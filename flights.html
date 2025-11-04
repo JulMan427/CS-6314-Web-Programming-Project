@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Flights</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="script.js" defer></script>
+    <script defer>
+      function toggleTripType() {
+        const type = document.querySelector(
+          'input[name="tripType"]:checked'
+        ).value;
+        document.getElementById("returnDateField").style.display =
+          type === "round" ? "block" : "none";
+      }
+
+      function showPassengerForm() {
+        document.getElementById("passengerForm").style.display = "block";
+      }
+
+      function validateFlights(event) {
+        event.preventDefault();
+
+        const origin = document.getElementById("origin").value.trim();
+        const destination = document.getElementById("destination").value.trim();
+        const depart = new Date(document.getElementById("departDate").value);
+        const returnDateField = document.getElementById("returnDate");
+        const returnDate = returnDateField.value
+          ? new Date(returnDateField.value)
+          : null;
+
+        const adults = parseInt(document.getElementById("adults").value || 0);
+        const children = parseInt(
+          document.getElementById("children").value || 0
+        );
+        const infants = parseInt(document.getElementById("infants").value || 0);
+
+        const cities = [
+          "Dallas",
+          "Houston",
+          "Austin",
+          "San Antonio",
+          "Los Angeles",
+          "San Diego",
+          "San Francisco",
+        ];
+        const dateMin = new Date("2024-09-01");
+        const dateMax = new Date("2024-12-01");
+
+        if (!cities.includes(origin) || !cities.includes(destination)) {
+          return alert(
+            "Origin and destination must be cities in Texas or California."
+          );
+        }
+
+        if (
+          depart < dateMin ||
+          depart > dateMax ||
+          (returnDate && (returnDate < dateMin || returnDate > dateMax))
+        ) {
+          return alert("Dates must be between Sep 1, 2024 and Dec 1, 2024.");
+        }
+
+        if (adults > 4 || children > 4 || infants > 4) {
+          return alert("No more than 4 passengers in each category.");
+        }
+
+        alert(`Flight search successful:
+      ${origin} → ${destination}
+      Departure: ${depart.toDateString()}
+      ${returnDate ? "Return: " + returnDate.toDateString() : ""}
+      Adults: ${adults}, Children: ${children}, Infants: ${infants}`);
+      }
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Flights</h1>
+      <p id="datetime"></p>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
+      <div class="main-content">
+        <form onsubmit="validateFlights(event)">
+          <label
+            ><input
+              type="radio"
+              name="tripType"
+              value="oneway"
+              checked
+              onclick="toggleTripType()"
+            />
+            One Way</label
+          >
+          <label
+            ><input
+              type="radio"
+              name="tripType"
+              value="round"
+              onclick="toggleTripType()"
+            />
+            Round Trip</label
+          ><br />
+
+          <label>Origin: <input type="text" id="origin" required /></label
+          ><br />
+          <label
+            >Destination: <input type="text" id="destination" required /></label
+          ><br />
+          <label
+            >Departure Date:
+            <input type="date" id="departDate" required /></label
+          ><br />
+          <div id="returnDateField" style="display: none">
+            <label>Return Date: <input type="date" id="returnDate" /></label
+            ><br />
+          </div>
+
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png"
+            alt="Passenger"
+            width="30"
+            style="cursor: pointer"
+            onclick="showPassengerForm()"
+          />
+
+          <div id="passengerForm" style="display: none">
+            <label
+              >Adults:
+              <input type="number" id="adults" min="0" max="4" /></label
+            ><br />
+            <label
+              >Children:
+              <input type="number" id="children" min="0" max="4" /></label
+            ><br />
+            <label
+              >Infants:
+              <input type="number" id="infants" min="0" max="4" /></label
+            ><br />
+          </div>
+
+          <button type="submit">Search</button>
+        </form>
+      </div>
+    </main>
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
+</html>

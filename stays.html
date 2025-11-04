@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Stays</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="script.js" defer></script>
+    <script defer>
+      function validateStays(event) {
+        event.preventDefault();
+        const city = document.getElementById("city").value.trim();
+        const checkIn = new Date(document.getElementById("checkIn").value);
+        const checkOut = new Date(document.getElementById("checkOut").value);
+        const adults = parseInt(document.getElementById("adults").value || 0);
+        const children = parseInt(
+          document.getElementById("children").value || 0
+        );
+        const infants = parseInt(document.getElementById("infants").value || 0);
+
+        const cities = [
+          "Dallas",
+          "Austin",
+          "Houston",
+          "San Antonio",
+          "Los Angeles",
+          "San Diego",
+          "San Francisco",
+        ];
+        const dateMin = new Date("2024-09-01");
+        const dateMax = new Date("2024-12-01");
+
+        if (!cities.includes(city))
+          return alert("City must be in Texas or California.");
+        if (
+          checkIn < dateMin ||
+          checkIn > dateMax ||
+          checkOut < dateMin ||
+          checkOut > dateMax
+        )
+          return alert("Dates must be between Sep 1 and Dec 1, 2024.");
+        if (checkOut <= checkIn)
+          return alert("Check-out must be after check-in.");
+
+        // Infants can stay extra, but other guests ≤ 2 per room
+        const nonInfantGuests = adults + children;
+        const rooms = Math.ceil(nonInfantGuests / 2);
+
+        alert(`Stays search successful:
+      City: ${city}
+      Check-In: ${checkIn.toDateString()}
+      Check-Out: ${checkOut.toDateString()}
+      Adults: ${adults}, Children: ${children}, Infants: ${infants}
+      Rooms needed: ${rooms}`);
+      }
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Stays</h1>
+      <p id="datetime"></p>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
+      <div class="main-content">
+        <form onsubmit="validateStays(event)">
+          <label>City: <input type="text" id="city" required /></label><br />
+          <label
+            >Check-In Date: <input type="date" id="checkIn" required /></label
+          ><br />
+          <label
+            >Check-Out Date: <input type="date" id="checkOut" required /></label
+          ><br />
+          <label
+            >Adults: <input type="number" id="adults" min="0" max="10" /></label
+          ><br />
+          <label
+            >Children:
+            <input type="number" id="children" min="0" max="10" /></label
+          ><br />
+          <label
+            >Infants:
+            <input type="number" id="infants" min="0" max="10" /></label
+          ><br />
+          <button type="submit">Search</button>
+        </form>
+      </div>
+    </main>
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
+</html>

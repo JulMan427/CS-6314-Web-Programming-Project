@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="script.js" defer></script>
+    <script defer>
+      function validateForm(event) {
+        event.preventDefault();
+
+        const fname = document.getElementById("fname").value.trim();
+        const lname = document.getElementById("lname").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const comment = document.getElementById("comment").value.trim();
+        const gender = document.querySelector('input[name="gender"]:checked');
+
+        const nameRegex = /^[A-Z][a-z]+$/;
+        const phoneRegex = /^\(\d{3}\)\s\d{3}-\d{4}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!nameRegex.test(fname) || !nameRegex.test(lname))
+          return alert(
+            "Names must start with a capital and contain letters only."
+          );
+        if (fname === lname)
+          return alert("First and last names cannot be the same.");
+        if (!phoneRegex.test(phone))
+          return alert("Phone format must be (ddd) ddd-dddd.");
+        if (!emailRegex.test(email))
+          return alert("Enter a valid email address.");
+        if (!gender) return alert("Please select your gender.");
+        if (comment.length < 10)
+          return alert("Comment must be at least 10 characters.");
+
+        alert("Form submitted successfully!");
+      }
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Contact Us</h1>
+      <p id="datetime"></p>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
+      <div class="main-content">
+        <form onsubmit="validateForm(event)">
+          <label>First Name: <input type="text" id="fname" required /></label
+          ><br />
+          <label>Last Name: <input type="text" id="lname" required /></label
+          ><br />
+          <label
+            >Phone:
+            <input
+              type="text"
+              id="phone"
+              placeholder="(123) 456-7890"
+              required /></label
+          ><br />
+          <label>Email: <input type="email" id="email" required /></label><br />
+          <label
+            >Gender: <input type="radio" name="gender" value="Male" />Male
+            <input type="radio" name="gender" value="Female" />Female </label
+          ><br />
+          <label>Comment: <textarea id="comment" required></textarea></label
+          ><br />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </main>
+
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cruises</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js" defer></script>
+    <script defer>
+      $(document).ready(function () {
+        $("#cruiseForm").submit(function (e) {
+          e.preventDefault();
+
+          const destination = $("#destination").val().trim();
+          const depart = new Date($("#departDate").val());
+          const minDays = parseInt($("#minDays").val());
+          const maxDays = parseInt($("#maxDays").val());
+          const adults = parseInt($("#adults").val());
+          const children = parseInt($("#children").val());
+          const infants = parseInt($("#infants").val());
+
+          const validDestinations = ["Alaska", "Bahamas", "Europe", "Mexico"];
+          const dateMin = new Date("2024-09-01");
+          const dateMax = new Date("2024-12-01");
+
+          if (!validDestinations.includes(destination))
+            return alert(
+              "Destination must be Alaska, Bahamas, Europe, or Mexico."
+            );
+          if (minDays < 3 || maxDays > 10 || minDays > maxDays)
+            return alert("Duration must be between 3–10 days.");
+          if (depart < dateMin || depart > dateMax)
+            return alert("Departure must be between Sep 1 and Dec 1, 2024.");
+          if (adults > 2 || children > 2)
+            return alert("No more than 2 guests per room (infants allowed).");
+
+          const nonInfantGuests = adults + children;
+          const rooms = Math.ceil(nonInfantGuests / 2);
+
+          $("#result").html(`
+          <strong>Destination:</strong> ${destination}<br>
+          <strong>Depart:</strong> ${depart.toDateString()}<br>
+          <strong>Duration:</strong> ${minDays} - ${maxDays} days<br>
+          <strong>Guests:</strong> Adults ${adults}, Children ${children}, Infants ${infants}
+          <strong>Rooms needed: ${rooms} <strong>
+        `);
+        });
+      });
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Cruises</h1>
+      <p id="datetime"></p>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
+      <div class="main-content">
+        <form id="cruiseForm">
+          <label
+            >Destination: <input type="text" id="destination" required /></label
+          ><br />
+          <label
+            >Departure Date:
+            <input type="date" id="departDate" required /></label
+          ><br />
+          <label
+            >Min Duration:
+            <input
+              type="number"
+              id="minDays"
+              min="3"
+              max="10"
+              required /></label
+          ><br />
+          <label
+            >Max Duration:
+            <input
+              type="number"
+              id="maxDays"
+              min="3"
+              max="10"
+              required /></label
+          ><br />
+          <label
+            >Adults: <input type="number" id="adults" min="0" max="4" /></label
+          ><br />
+          <label
+            >Children:
+            <input type="number" id="children" min="0" max="4" /></label
+          ><br />
+          <label
+            >Infants:
+            <input type="number" id="infants" min="0" max="4" /></label
+          ><br />
+          <button type="submit">Submit</button>
+        </form>
+        <div id="result" style="margin-top: 20px"></div>
+      </div>
+    </main>
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
+</html>

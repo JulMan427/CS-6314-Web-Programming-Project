@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cars</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="script.js" defer></script>
+    <script defer>
+      function validateCars(event) {
+        event.preventDefault();
+        const city = document.getElementById("city").value.trim();
+        const carType = document.getElementById("carType").value;
+        const checkIn = new Date(document.getElementById("checkIn").value);
+        const checkOut = new Date(document.getElementById("checkOut").value);
+
+        const validCars = ["economy", "SUV", "compact", "midsize"];
+        const dateMin = new Date("2024-09-01");
+        const dateMax = new Date("2024-12-01");
+
+        if (!validCars.includes(carType))
+          return alert("Car must be economy, SUV, compact, or midsize.");
+        if (
+          checkIn < dateMin ||
+          checkIn > dateMax ||
+          checkOut < dateMin ||
+          checkOut > dateMax
+        )
+          return alert("Dates must be between Sep 1 and Dec 1, 2024.");
+        if (checkOut <= checkIn)
+          return alert("Check-out must be after check-in.");
+
+        const output = document.createElement("p");
+        const car_list = document.querySelector(".list");
+        output.textContent = `City: ${city}, Car: ${carType}, Check-In: ${checkIn.toDateString()}, Check-Out: ${checkOut.toDateString()}`;
+        car_list.appendChild(output);
+      }
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Car Rentals</h1>
+      <p id="datetime"></p>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
+      <div class="main-content">
+        <form onsubmit="validateCars(event)">
+          <label>City: <input type="text" id="city" required /></label><br />
+          <label
+            >Car Type:
+            <select id="carType">
+              <option value="economy">Economy</option>
+              <option value="SUV">SUV</option>
+              <option value="compact">Compact</option>
+              <option value="midsize">Midsize</option>
+            </select> </label
+          ><br />
+          <label
+            >Pick-Up Date: <input type="date" id="checkIn" required /></label
+          ><br />
+          <label
+            >Return Date: <input type="date" id="checkOut" required /></label
+          ><br />
+          <button type="submit">Submit</button>
+        </form>
+        <div class="list"></div>
+      </div>
+    </main>
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
+</html>
