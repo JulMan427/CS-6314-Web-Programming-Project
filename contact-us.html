@@ -16,25 +16,51 @@
         const comment = document.getElementById("comment").value.trim();
         const gender = document.querySelector('input[name="gender"]:checked');
 
-        const nameRegex = /^[A-Z][a-z]+$/;
-        const phoneRegex = /^\(\d{3}\)\s\d{3}-\d{4}$/;
+        // Spec: alphabetic only, first letter capital
+        const nameRegex = /^[A-Z][a-zA-Z]+$/;
+        // Spec: (ddd)ddd-dddd  (NO space)
+        const phoneRegex = /^\(\d{3}\)\d{3}-\d{4}$/;
+        // Must contain @ and . (simple robust pattern)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!nameRegex.test(fname) || !nameRegex.test(lname))
-          return alert(
-            "Names must start with a capital and contain letters only."
-          );
-        if (fname === lname)
-          return alert("First and last names cannot be the same.");
-        if (!phoneRegex.test(phone))
-          return alert("Phone format must be (ddd) ddd-dddd.");
-        if (!emailRegex.test(email))
-          return alert("Enter a valid email address.");
-        if (!gender) return alert("Please select your gender.");
-        if (comment.length < 10)
-          return alert("Comment must be at least 10 characters.");
+        if (!nameRegex.test(fname) || !nameRegex.test(lname)) {
+          alert("Names must be alphabetic and start with a capital letter.");
+          return;
+        }
+        if (fname === lname) {
+          alert("First and last names cannot be the same.");
+          return;
+        }
+        if (!phoneRegex.test(phone)) {
+          alert("Phone format must be (ddd)ddd-dddd (e.g., (123)456-7890).");
+          return;
+        }
+        if (!emailRegex.test(email)) {
+          alert("Enter a valid email address.");
+          return;
+        }
+        if (!gender) {
+          alert("Please select your gender.");
+          return;
+        }
+        if (comment.length < 10) {
+          alert("Comment must be at least 10 characters.");
+          return;
+        }
 
-        alert("Form submitted successfully!");
+        // Save to JSON store (localStorage)
+        saveContactToJSON({
+          firstName: fname,
+          lastName: lname,
+          phone,
+          email,
+          gender: gender.value,
+          comment,
+          ts: new Date().toISOString(),
+        });
+
+        alert("Form submitted successfully and stored to JSON!");
+        event.target.reset();
       }
     </script>
   </head>
@@ -43,6 +69,7 @@
       <h1>Contact Us</h1>
       <p id="datetime"></p>
     </header>
+
     <nav>
       <ul>
         <li><a href="index.html">Home</a></li>
@@ -51,6 +78,7 @@
         <li><a href="cars.html">Cars</a></li>
         <li><a href="cruises.html">Cruises</a></li>
         <li><a href="contact-us.html">Contact Us</a></li>
+        <li><a href="cart.html">Cart</a></li>
       </ul>
     </nav>
 
@@ -58,29 +86,34 @@
       <div class="sidebar">
         <h2>Sidebar</h2>
       </div>
+
       <div class="main-content">
         <form onsubmit="validateForm(event)">
-          <label>First Name: <input type="text" id="fname" required /></label
-          ><br />
-          <label>Last Name: <input type="text" id="lname" required /></label
-          ><br />
-          <label
-            >Phone:
+          <label>First Name: <input type="text" id="fname" required /></label><br />
+          <label>Last Name: <input type="text" id="lname" required /></label><br />
+          <label>
+            Phone:
             <input
               type="text"
               id="phone"
-              placeholder="(123) 456-7890"
-              required /></label
-          ><br />
+              placeholder="(123)456-7890"
+              required
+            />
+          </label><br />
           <label>Email: <input type="email" id="email" required /></label><br />
-          <label
-            >Gender: <input type="radio" name="gender" value="Male" />Male
-            <input type="radio" name="gender" value="Female" />Female </label
-          ><br />
-          <label>Comment: <textarea id="comment" required></textarea></label
-          ><br />
+          <label>
+            Gender:
+            <input type="radio" name="gender" value="Male" />Male
+            <input type="radio" name="gender" value="Female" />Female
+          </label><br />
+          <label>Comment: <textarea id="comment" required></textarea></label><br />
           <button type="submit">Submit</button>
         </form>
+
+        <!-- New: export your stored submissions -->
+        <div style="margin-top: 12px;">
+          <button type="button" onclick="downloadContactJSON()">Download Submissions JSON</button>
+        </div>
       </div>
     </main>
 

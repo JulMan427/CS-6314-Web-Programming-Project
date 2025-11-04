@@ -5,11 +5,13 @@
     <title>Flights</title>
     <link rel="stylesheet" href="mystyle.css" />
     <script src="script.js" defer></script>
+
     <script defer>
+      /*********************
+       * Keep your behavior *
+       *********************/
       function toggleTripType() {
-        const type = document.querySelector(
-          'input[name="tripType"]:checked'
-        ).value;
+        const type = document.querySelector('input[name="tripType"]:checked').value;
         document.getElementById("returnDateField").style.display =
           type === "round" ? "block" : "none";
       }
@@ -18,21 +20,162 @@
         document.getElementById("passengerForm").style.display = "block";
       }
 
-      function validateFlights(event) {
+      /********************************
+       * New: flights + cart utilities *
+       ********************************/
+      const FLIGHTS_KEY = "flightsInventory";
+      const CART_KEY = "cart";
+
+      // Ensure we have flights in localStorage: try fetch flights.json, else auto-generate
+      async function ensureFlightsLoaded() {
+        const have = localStorage.getItem(FLIGHTS_KEY);
+        if (have) return JSON.parse(have);
+
+        try {
+          const res = await fetch("flights.json", { cache: "no-store" });
+          if (!res.ok) throw new Error("no flights.json");
+          const json = await res.json();
+          localStorage.setItem(FLIGHTS_KEY, JSON.stringify(json));
+          return json;
+        } catch {
+          const gen = generateFlights();
+          localStorage.setItem(FLIGHTS_KEY, JSON.stringify(gen));
+          return gen;
+        }
+      }
+
+      // Generate ~50+ TX<->CA flights across the Sep 1–Dec 1 window
+      function generateFlights() {
+        const TX = ["Dallas", "Houston", "Austin", "San Antonio"];
+        const CA = ["Los Angeles", "San Diego", "San Francisco", "San Jose"];
+        const all = [];
+        let id = 1000;
+        const dayMs = 86400000;
+
+        for (let day = Date.parse("2024-09-01"); day <= Date.parse("2024-12-01"); day += 5 * dayMs) {
+          TX.forEach((o) => {
+            CA.forEach((d) => {
+              // Departing leg
+              const dep = new Date(day + Math.floor(Math.random() * 10) * 3600000);
+              const arr = new Date(dep.getTime() + (2 + Math.floor(Math.random() * 3)) * 3600000);
+              const price = 120 + Math.floor(Math.random() * 180);
+              const seats = 5 + Math.floor(Math.random() * 25);
+              all.push({
+                flightId: "F" + id++,
+                origin: o,
+                destination: d,
+                departureDate: dateOnlyStr(dep),
+                arrivalDate: dateOnlyStr(arr),
+                departureTime: dep.toTimeString().slice(0, 5),
+                arrivalTime: arr.toTimeString().slice(0, 5),
+                availableSeats: seats,
+                price,
+              });
+              // Return leg ~2 days later
+              const dep2 = new Date(dep.getTime() + 2 * dayMs);
+              const arr2 = new Date(dep2.getTime() + (2 + Math.floor(Math.random() * 3)) * 3600000);
+              const price2 = 120 + Math.floor(Math.random() * 180);
+              const seats2 = 5 + Math.floor(Math.random() * 25);
+              all.push({
+                flightId: "F" + id++,
+                origin: d,
+                destination: o,
+                departureDate: dateOnlyStr(dep2),
+                arrivalDate: dateOnlyStr(arr2),
+                departureTime: dep2.toTimeString().slice(0, 5),
+                arrivalTime: arr2.toTimeString().slice(0, 5),
+                availableSeats: seats2,
+                price: price2,
+              });
+            });
+          });
+        }
+        return all.slice(0, Math.max(50, all.length));
+      }
+
+      function dateOnlyStr(d) {
+        return d.toISOString().slice(0, 10); // YYYY-MM-DD
+      }
+
+      function searchFlights({ origin, destination, dateStr, seatsNeeded }) {
+        const list = JSON.parse(localStorage.getItem(FLIGHTS_KEY) || "[]");
+        const date = new Date(dateStr);
+        const dayMs = 86400000;
+
+        const matchesOn = (d) =>
+          list.filter(
+            (f) =>
+              f.origin === origin &&
+              f.destination === destination &&
+              f.departureDate === dateOnlyStr(d) &&
+              f.availableSeats >= seatsNeeded
+          );
+
+        let results = matchesOn(date);
+        if (results.length) return { results, usedDate: dateOnlyStr(date) };
+
+        // Try ±3 days
+        for (let delta = 1; delta <= 3; delta++) {
+          const before = new Date(date.getTime() - delta * dayMs);
+          const after = new Date(date.getTime() + delta * dayMs);
+          const rB = matchesOn(before);
+          if (rB.length) return { results: rB, usedDate: dateOnlyStr(before) };
+          const rA = matchesOn(after);
+          if (rA.length) return { results: rA, usedDate: dateOnlyStr(after) };
+        }
+        return { results: [], usedDate: dateOnlyStr(date) };
+      }
+
+      function renderResults(containerId, flights, usedDateStr, radioName) {
+        const box = document.getElementById(containerId);
+        if (!box) return;
+
+        if (!flights.length) {
+          box.innerHTML = `<p>No flights found for your date or ±3 days.</p>`;
+          return;
+        }
+
+        let html = `<p class="small">Showing flights on <strong>${usedDateStr}</strong></p>`;
+        html += `<table class="table"><thead><tr>
+          <th></th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th><th>Seats</th><th>Price</th>
+        </tr></thead><tbody>`;
+
+        flights.forEach((f) => {
+          html += `<tr>
+            <td><input type="radio" name="${radioName}" value="${f.flightId}"></td>
+            <td>${f.flightId}</td>
+            <td>${f.origin} → ${f.destination}</td>
+            <td>${f.departureDate} ${f.departureTime}</td>
+            <td>${f.arrivalDate} ${f.arrivalTime}</td>
+            <td>${f.availableSeats}</td>
+            <td>$${f.price}</td>
+          </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        box.innerHTML = html;
+      }
+
+      function addToCart(item) {
+        const cart = JSON.parse(localStorage.getItem(CART_KEY) || "{}");
+        Object.assign(cart, item);
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      }
+
+      /**************************
+       * Your validate function *
+       **************************/
+      async function validateFlights(event) {
         event.preventDefault();
 
         const origin = document.getElementById("origin").value.trim();
         const destination = document.getElementById("destination").value.trim();
         const depart = new Date(document.getElementById("departDate").value);
         const returnDateField = document.getElementById("returnDate");
-        const returnDate = returnDateField.value
-          ? new Date(returnDateField.value)
-          : null;
+        const returnDate = returnDateField.value ? new Date(returnDateField.value) : null;
 
         const adults = parseInt(document.getElementById("adults").value || 0);
-        const children = parseInt(
-          document.getElementById("children").value || 0
-        );
+        const children = parseInt(document.getElementById("children").value || 0);
         const infants = parseInt(document.getElementById("infants").value || 0);
 
         const cities = [
@@ -43,14 +186,13 @@
           "Los Angeles",
           "San Diego",
           "San Francisco",
+          "San Jose"
         ];
         const dateMin = new Date("2024-09-01");
         const dateMax = new Date("2024-12-01");
 
         if (!cities.includes(origin) || !cities.includes(destination)) {
-          return alert(
-            "Origin and destination must be cities in Texas or California."
-          );
+          return alert("Origin and destination must be cities in Texas or California.");
         }
 
         if (
@@ -65,14 +207,78 @@
           return alert("No more than 4 passengers in each category.");
         }
 
-        alert(`Flight search successful:
-      ${origin} → ${destination}
-      Departure: ${depart.toDateString()}
-      ${returnDate ? "Return: " + returnDate.toDateString() : ""}
-      Adults: ${adults}, Children: ${children}, Infants: ${infants}`);
+        // Load inventory (fetch or generate)
+        await ensureFlightsLoaded();
+
+        // total seats needed (one per traveler, including infants per assignment)
+        const seatsNeeded = adults + children + infants || 1;
+
+        const type = document.querySelector('input[name="tripType"]:checked').value;
+
+        // Search departing
+        const out = searchFlights({
+          origin,
+          destination,
+          dateStr: document.getElementById("departDate").value,
+          seatsNeeded,
+        });
+        renderResults("outResults", out.results, out.usedDate, "departSel");
+
+        // If round, search returning too
+        if (type === "round") {
+          const back = searchFlights({
+            origin: destination,
+            destination: origin,
+            dateStr: document.getElementById("returnDate").value,
+            seatsNeeded,
+          });
+          renderResults("backResults", back.results, back.usedDate, "returnSel");
+          document.getElementById("roundBlock").style.display = "block";
+        } else {
+          document.getElementById("roundBlock").style.display = "none";
+          document.getElementById("backResults").innerHTML = "";
+        }
+
+        // Also show a small summary
+        document.getElementById("searchSummary").innerHTML =
+          `<p class="note">Passengers: ${adults} adults, ${children} children, ${infants} infants.</p>`;
       }
+
+      function addSelectedToCart() {
+        const type = document.querySelector('input[name="tripType"]:checked').value;
+        const outSel = document.querySelector('input[name="departSel"]:checked');
+        if (!outSel) return alert("Please select a departing flight.");
+
+        const flights = JSON.parse(localStorage.getItem(FLIGHTS_KEY) || "[]");
+        const outFlight = flights.find((f) => f.flightId === outSel.value);
+
+        const pax = {
+          adults: parseInt(document.getElementById("adults").value || 0),
+          children: parseInt(document.getElementById("children").value || 0),
+          infants: parseInt(document.getElementById("infants").value || 0),
+        };
+
+        if (type === "round") {
+          const backSel = document.querySelector('input[name="returnSel"]:checked');
+          if (!backSel) return alert("Please select a returning flight.");
+          const backFlight = flights.find((f) => f.flightId === backSel.value);
+          addToCart({ kind: "round", out: outFlight, back: backFlight, pax });
+        } else {
+          addToCart({ kind: "oneway", out: outFlight, pax });
+        }
+
+        alert("Added to cart! Open the Cart page to complete booking.");
+        // Optional: navigate directly to cart
+        // location.href = "cart.html";
+      }
+
+      // Initialize correct visibility on load
+      document.addEventListener("DOMContentLoaded", () => {
+        toggleTripType();
+      });
     </script>
   </head>
+
   <body onload="showDateTime()">
     <header>
       <h1>Flights</h1>
@@ -86,6 +292,7 @@
         <li><a href="cars.html">Cars</a></li>
         <li><a href="cruises.html">Cruises</a></li>
         <li><a href="contact-us.html">Contact Us</a></li>
+        <li><a href="cart.html">Cart</a></li>
       </ul>
     </nav>
 
@@ -93,6 +300,7 @@
       <div class="sidebar">
         <h2>Sidebar</h2>
       </div>
+
       <div class="main-content">
         <form onsubmit="validateFlights(event)">
           <label
@@ -118,8 +326,9 @@
           <label>Origin: <input type="text" id="origin" required /></label
           ><br />
           <label
-            >Destination: <input type="text" id="destination" required /></label
-          ><br />
+            >Destination: <input type="text" id="destination" required
+          /></label>
+          <br />
           <label
             >Departure Date:
             <input type="date" id="departDate" required /></label
@@ -140,22 +349,41 @@
           <div id="passengerForm" style="display: none">
             <label
               >Adults:
-              <input type="number" id="adults" min="0" max="4" /></label
-            ><br />
+              <input type="number" id="adults" min="0" max="4" value="1"
+            /></label>
+            <br />
             <label
               >Children:
-              <input type="number" id="children" min="0" max="4" /></label
-            ><br />
+              <input type="number" id="children" min="0" max="4" value="0"
+            /></label>
+            <br />
             <label
               >Infants:
-              <input type="number" id="infants" min="0" max="4" /></label
-            ><br />
+              <input type="number" id="infants" min="0" max="4" value="0"
+            /></label>
+            <br />
           </div>
 
           <button type="submit">Search</button>
         </form>
+
+        <!-- New: summary + results + add-to-cart -->
+        <div id="searchSummary" style="margin-top: 10px;"></div>
+
+        <h3 style="margin-top:16px;">Departing Flights</h3>
+        <div id="outResults"></div>
+
+        <div id="roundBlock" style="display:none;">
+          <h3 style="margin-top:16px;">Returning Flights</h3>
+          <div id="backResults"></div>
+        </div>
+
+        <button type="button" style="margin-top:12px;" onclick="addSelectedToCart()">
+          Add Selected to Cart
+        </button>
       </div>
     </main>
+
     <footer>
       <button onclick="increaseFont()">Increase Font</button>
       <button onclick="decreaseFont()">Decrease Font</button>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart</title>
+  <link rel="stylesheet" href="mystyle.css">
+  <script src="script.js" defer></script>
+  <script>
+    let cart, pax;
+    document.addEventListener("DOMContentLoaded", ()=>{
+      cart = getCart();
+      if (!cart || !cart.kind){ document.getElementById("cartBody").innerHTML = "<p>Cart is empty.</p>"; return; }
+      pax = cart.pax || {adults:0,children:0,infants:0};
+      renderCart();
+      buildPassengerForm();
+    });
+
+    function renderCart(){
+      const wrap = document.getElementById("cartBody");
+      const rows = [];
+      const addRow = (f, label)=>rows.push(`
+        <tr><td>${label}</td><td>${f.flightId}</td><td>${f.origin} → ${f.destination}</td>
+        <td>${f.departureDate} ${f.departureTime}</td><td>${f.arrivalDate} ${f.arrivalTime}</td></tr>`);
+
+      if (cart.out) addRow(cart.out, "Depart");
+      if (cart.back) addRow(cart.back, "Return");
+
+      const base = (cart.out?.price || 0) + (cart.back?.price || 0);
+      const total = ticketTotal(base, pax.adults, pax.children, pax.infants);
+
+      wrap.innerHTML = `
+        <table class="table">
+          <thead><tr><th>Leg</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th></tr></thead>
+          <tbody>${rows.join("")}</tbody>
+        </table>
+        <p class="note">Passengers: ${pax.adults} adults, ${pax.children} children, ${pax.infants} infants</p>
+        <p><strong>Total Price:</strong> $${total.toFixed(2)}</p>
+      `;
+    }
+
+    function buildPassengerForm(){
+      const total = pax.adults + pax.children + pax.infants;
+      const box = document.getElementById("passengersBox");
+      let html = "<h3>Passenger Details</h3>";
+      for (let i=1; i<=total; i++){
+        html += `
+          <fieldset style="margin-bottom:12px;">
+            <legend>Passenger ${i}</legend>
+            <label>First Name <input required id="p${i}_fn"></label>
+            <label>Last Name <input required id="p${i}_ln"></label>
+            <label>Date of Birth <input type="date" required id="p${i}_dob"></label>
+            <label>SSN <input required id="p${i}_ssn" placeholder="123-45-6789"></label>
+          </fieldset>
+        `;
+      }
+      html += `<button type="button" onclick="bookNow()">Book Flight(s)</button>
+               <button type="button" onclick="downloadBookingsJSON()">Download Bookings JSON</button>`;
+      box.innerHTML = html;
+    }
+
+    async function bookNow(){
+      const paxCount = pax.adults + pax.children + pax.infants;
+      const paxList = [];
+      for (let i=1; i<=paxCount; i++){
+        const fn = document.getElementById(`p${i}_fn`).value.trim();
+        const ln = document.getElementById(`p${i}_ln`).value.trim();
+        const dob= document.getElementById(`p${i}_dob`).value;
+        const ssn= document.getElementById(`p${i}_ssn`).value.trim();
+        if (!fn || !ln || !dob || !ssn) return alert("Please complete all passenger fields.");
+        paxList.push({firstName: fn, lastName: ln, dob, ssn});
+      }
+
+      // Assign booking number(s)
+      const userId = uniqueId("USER");
+      const outBk = uniqueId("BOOK");
+      const backBk = cart.kind==="round" ? uniqueId("BOOK") : null;
+
+      // Update flight seats
+      const flights = JSON.parse(localStorage.getItem("flightsInventory")||"[]");
+      const need = paxCount;
+      const dec = (fid)=>{
+        const idx = flights.findIndex(f=>f.flightId===fid);
+        if (idx>=0) flights[idx].availableSeats = Math.max(0, flights[idx].availableSeats - need);
+      };
+      if (cart.out) dec(cart.out.flightId);
+      if (cart.back) dec(cart.back.flightId);
+      updateFlightsInventory(flights);
+
+      // Save booking record(s)
+      const records = [];
+      if (cart.out){
+        records.push({
+          userId, bookingNumber: outBk, flightId: cart.out.flightId,
+          origin: cart.out.origin, destination: cart.out.destination,
+          departureDate: cart.out.departureDate, arrivalDate: cart.out.arrivalDate,
+          departureTime: cart.out.departureTime, arrivalTime: cart.out.arrivalTime,
+          passengers: paxList
+        });
+      }
+      if (cart.back){
+        records.push({
+          userId, bookingNumber: backBk, flightId: cart.back.flightId,
+          origin: cart.back.origin, destination: cart.back.destination,
+          departureDate: cart.back.departureDate, arrivalDate: cart.back.arrivalDate,
+          departureTime: cart.back.departureTime, arrivalTime: cart.back.arrivalTime,
+          passengers: paxList
+        });
+      }
+      records.forEach(saveBooking);
+
+      alert("Booked! Booking numbers:\n" + records.map(r=>r.bookingNumber).join(", "));
+      clearCart();
+      location.reload();
+    }
+  </script>
+</head>
+<body onload="showDateTime()">
+<header>
+  <div>Cart</div>
+  <div id="datetime" class="small"></div>
+</header>
+<nav>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="stays.html">Stays</a></li>
+    <li><a href="flights.html">Flights</a></li><li><a href="cars.html">Cars</a></li>
+    <li><a href="cruises.html">Cruises</a></li><li><a href="contact-us.html">Contact Us</a></li>
+    <li><a href="cart.html">Cart</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div id="cartBody"></div>
+  <div id="passengersBox" style="margin-top: 1em;"></div>
+</main>
+
+<footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+</body>
+</html>

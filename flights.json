@@ -1,0 +1,13 @@
+[
+  {
+    "flightId": "F1001",
+    "origin": "Dallas",
+    "destination": "Los Angeles",
+    "departureDate": "2024-09-05",
+    "arrivalDate": "2024-09-05",
+    "departureTime": "09:10",
+    "arrivalTime": "11:45",
+    "availableSeats": 18,
+    "price": 189
+  }
+]
