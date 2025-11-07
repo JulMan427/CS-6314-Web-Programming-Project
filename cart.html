@@ -6,137 +6,184 @@
   <link rel="stylesheet" href="mystyle.css">
   <script src="script.js" defer></script>
   <script>
-    let cart, pax;
-    document.addEventListener("DOMContentLoaded", ()=>{
+    var cart = null;
+    var pax = { adults: 0, children: 0, infants: 0 };
+
+    document.addEventListener("DOMContentLoaded", function () {
       cart = getCart();
-      if (!cart || !cart.kind){ document.getElementById("cartBody").innerHTML = "<p>Cart is empty.</p>"; return; }
-      pax = cart.pax || {adults:0,children:0,infants:0};
+      if (!cart || !cart.kind) {
+        document.getElementById("cartTableWrap").innerHTML = "<p>Cart is empty.</p>";
+        return;
+      }
+      pax = cart.pax || { adults: 0, children: 0, infants: 0 };
       renderCart();
       buildPassengerForm();
     });
 
-    function renderCart(){
-      const wrap = document.getElementById("cartBody");
-      const rows = [];
-      const addRow = (f, label)=>rows.push(`
-        <tr><td>${label}</td><td>${f.flightId}</td><td>${f.origin} → ${f.destination}</td>
-        <td>${f.departureDate} ${f.departureTime}</td><td>${f.arrivalDate} ${f.arrivalTime}</td></tr>`);
+    function renderCart() {
+      var wrap = document.getElementById("cartTableWrap");
+      var html = "";
+      html += '<table class="table">';
+      html += '<thead><tr><th>Leg</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th></tr></thead>';
+      html += "<tbody>";
+
+      function addRow(f, label) {
+        html += "<tr>";
+        html += "<td>" + label + "</td>";
+        html += "<td>" + f.flightId + "</td>";
+        html += "<td>" + f.origin + " \u2192 " + f.destination + "</td>";
+        html += "<td>" + f.departureDate + " " + f.departureTime + "</td>";
+        html += "<td>" + f.arrivalDate + " " + f.arrivalTime + "</td>";
+        html += "</tr>";
+      }
 
       if (cart.out) addRow(cart.out, "Depart");
       if (cart.back) addRow(cart.back, "Return");
 
-      const base = (cart.out?.price || 0) + (cart.back?.price || 0);
-      const total = ticketTotal(base, pax.adults, pax.children, pax.infants);
+      html += "</tbody></table>";
+      wrap.innerHTML = html;
 
-      wrap.innerHTML = `
-        <table class="table">
-          <thead><tr><th>Leg</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th></tr></thead>
-          <tbody>${rows.join("")}</tbody>
-        </table>
-        <p class="note">Passengers: ${pax.adults} adults, ${pax.children} children, ${pax.infants} infants</p>
-        <p><strong>Total Price:</strong> $${total.toFixed(2)}</p>
-      `;
+      var base = (cart.out ? cart.out.price : 0) + (cart.back ? cart.back.price : 0);
+      var total = ticketTotal(base, pax.adults, pax.children, pax.infants);
+
+      document.getElementById("cartSummary").innerHTML =
+        '<p class="note">Passengers: ' + pax.adults + " adults, " + pax.children + " children, " + pax.infants + ' infants</p>' +
+        "<p><strong>Total Price:</strong> $" + total.toFixed(2) + "</p>";
     }
 
-    function buildPassengerForm(){
-      const total = pax.adults + pax.children + pax.infants;
-      const box = document.getElementById("passengersBox");
-      let html = "<h3>Passenger Details</h3>";
-      for (let i=1; i<=total; i++){
-        html += `
-          <fieldset style="margin-bottom:12px;">
-            <legend>Passenger ${i}</legend>
-            <label>First Name <input required id="p${i}_fn"></label>
-            <label>Last Name <input required id="p${i}_ln"></label>
-            <label>Date of Birth <input type="date" required id="p${i}_dob"></label>
-            <label>SSN <input required id="p${i}_ssn" placeholder="123-45-6789"></label>
-          </fieldset>
-        `;
+    function buildPassengerForm() {
+      var total = pax.adults + pax.children + pax.infants;
+      var box = document.getElementById("passengersBox");
+      var html = "<h3>Passenger Details</h3>";
+      var i;
+
+      for (i = 1; i <= total; i++) {
+        html += '<fieldset style="margin-bottom:12px;">';
+        html += "<legend>Passenger " + i + "</legend>";
+        html += '<label>First Name <input required id="p' + i + '_fn"></label>';
+        html += '<label>Last Name <input required id="p' + i + '_ln"></label>';
+        html += '<label>Date of Birth <input type="date" required id="p' + i + '_dob"></label>';
+        html += '<label>SSN <input required id="p' + i + '_ssn" placeholder="123-45-6789"></label>';
+        html += "</fieldset>";
       }
-      html += `<button type="button" onclick="bookNow()">Book Flight(s)</button>
-               <button type="button" onclick="downloadBookingsJSON()">Download Bookings JSON</button>`;
+
+      html += '<button type="button" onclick="bookNow()">Book Flight(s)</button> ';
+      html += '<button type="button" onclick="downloadBookingsJSON()">Download Bookings JSON</button>';
       box.innerHTML = html;
     }
 
-    async function bookNow(){
-      const paxCount = pax.adults + pax.children + pax.infants;
-      const paxList = [];
-      for (let i=1; i<=paxCount; i++){
-        const fn = document.getElementById(`p${i}_fn`).value.trim();
-        const ln = document.getElementById(`p${i}_ln`).value.trim();
-        const dob= document.getElementById(`p${i}_dob`).value;
-        const ssn= document.getElementById(`p${i}_ssn`).value.trim();
-        if (!fn || !ln || !dob || !ssn) return alert("Please complete all passenger fields.");
-        paxList.push({firstName: fn, lastName: ln, dob, ssn});
+    function bookNow() {
+      var paxCount = pax.adults + pax.children + pax.infants;
+      var paxList = [];
+      var i;
+
+      for (i = 1; i <= paxCount; i++) {
+        var fn = document.getElementById("p" + i + "_fn").value.trim();
+        var ln = document.getElementById("p" + i + "_ln").value.trim();
+        var dob = document.getElementById("p" + i + "_dob").value;
+        var ssn = document.getElementById("p" + i + "_ssn").value.trim();
+        if (!fn || !ln || !dob || !ssn) {
+          alert("Please complete all passenger fields.");
+          return;
+        }
+        paxList.push({ firstName: fn, lastName: ln, dob: dob, ssn: ssn });
       }
 
-      // Assign booking number(s)
-      const userId = uniqueId("USER");
-      const outBk = uniqueId("BOOK");
-      const backBk = cart.kind==="round" ? uniqueId("BOOK") : null;
+      // Assign booking numbers
+      var userId = uniqueId("USER");
+      var outBk = uniqueId("BOOK");
+      var backBk = cart.kind === "round" ? uniqueId("BOOK") : null;
 
-      // Update flight seats
-      const flights = JSON.parse(localStorage.getItem("flightsInventory")||"[]");
-      const need = paxCount;
-      const dec = (fid)=>{
-        const idx = flights.findIndex(f=>f.flightId===fid);
-        if (idx>=0) flights[idx].availableSeats = Math.max(0, flights[idx].availableSeats - need);
-      };
+      // Update seats in inventory
+      var flights = JSON.parse(localStorage.getItem("flightsInventory") || "[]");
+      var need = paxCount;
+
+      function dec(fid) {
+        var idx = -1;
+        var j;
+        for (j = 0; j < flights.length; j++) {
+          if (flights[j].flightId === fid) { idx = j; break; }
+        }
+        if (idx >= 0) {
+          var current = flights[idx].availableSeats;
+          flights[idx].availableSeats = Math.max(0, current - need);
+        }
+      }
+
       if (cart.out) dec(cart.out.flightId);
       if (cart.back) dec(cart.back.flightId);
       updateFlightsInventory(flights);
 
       // Save booking record(s)
-      const records = [];
-      if (cart.out){
+      var records = [];
+
+      if (cart.out) {
         records.push({
-          userId, bookingNumber: outBk, flightId: cart.out.flightId,
+          userId: userId, bookingNumber: outBk, flightId: cart.out.flightId,
           origin: cart.out.origin, destination: cart.out.destination,
           departureDate: cart.out.departureDate, arrivalDate: cart.out.arrivalDate,
           departureTime: cart.out.departureTime, arrivalTime: cart.out.arrivalTime,
           passengers: paxList
         });
       }
-      if (cart.back){
+      if (cart.back) {
         records.push({
-          userId, bookingNumber: backBk, flightId: cart.back.flightId,
+          userId: userId, bookingNumber: backBk, flightId: cart.back.flightId,
           origin: cart.back.origin, destination: cart.back.destination,
           departureDate: cart.back.departureDate, arrivalDate: cart.back.arrivalDate,
           departureTime: cart.back.departureTime, arrivalTime: cart.back.arrivalTime,
           passengers: paxList
         });
       }
-      records.forEach(saveBooking);
 
-      alert("Booked! Booking numbers:\n" + records.map(r=>r.bookingNumber).join(", "));
+      var k;
+      for (k = 0; k < records.length; k++) saveBooking(records[k]);
+
+      var msg = "Booked! Booking numbers:\n";
+      for (k = 0; k < records.length; k++) {
+        msg += records[k].bookingNumber + (k < records.length - 1 ? ", " : "");
+      }
+      alert(msg);
+
       clearCart();
       location.reload();
     }
   </script>
 </head>
 <body onload="showDateTime()">
-<header>
-  <div>Cart</div>
-  <div id="datetime" class="small"></div>
-</header>
-<nav>
-  <ul>
-    <li><a href="index.html">Home</a></li><li><a href="stays.html">Stays</a></li>
-    <li><a href="flights.html">Flights</a></li><li><a href="cars.html">Cars</a></li>
-    <li><a href="cruises.html">Cruises</a></li><li><a href="contact-us.html">Contact Us</a></li>
-    <li><a href="cart.html">Cart</a></li>
-  </ul>
-</nav>
+  <header>
+    <h1>Cart</h1>
+    <p id="datetime"></p>
+  </header>
 
-<main>
-  <div id="cartBody"></div>
-  <div id="passengersBox" style="margin-top: 1em;"></div>
-</main>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="stays.html">Stays</a></li>
+      <li><a href="flights.html">Flights</a></li>
+      <li><a href="cars.html">Cars</a></li>
+      <li><a href="cruises.html">Cruises</a></li>
+      <li><a href="contact-us.html">Contact Us</a></li>
+      <li><a href="cart.html">Cart</a></li>
+    </ul>
+  </nav>
 
-<footer>
-      <button onclick="increaseFont()">Increase Font</button>
-      <button onclick="decreaseFont()">Decrease Font</button>
-      <button onclick="changeBackground()">Change Background</button>
-    </footer>
+  <main>
+    <div class="sidebar">
+      <h2>Sidebar</h2>
+    </div>
+
+    <div class="main-content">
+      <div id="cartTableWrap"></div>
+      <div id="cartSummary" style="margin-top: 10px;"></div>
+      <div id="passengersBox" style="margin-top: 1em;"></div>
+    </div>
+  </main>
+
+  <footer>
+    <button onclick="increaseFont()">Increase Font</button>
+    <button onclick="decreaseFont()">Decrease Font</button>
+    <button onclick="changeBackground()">Change Background</button>
+  </footer>
 </body>
 </html>
