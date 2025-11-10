@@ -5,35 +5,719 @@
     <title>Cars</title>
     <link rel="stylesheet" href="mystyle.css" />
     <script src="script.js" defer></script>
-    <script defer>
+    <style>
+      .car-suggestions {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .car-item {
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background-color: white;
+      }
+      .car-item h4 {
+        margin: 5px 0;
+      }
+      .car-item p {
+        margin: 3px 0;
+        font-size: 0.9em;
+      }
+      .book-btn {
+        background-color: #4caf50;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-top: 5px;
+      }
+      .book-btn:hover {
+        background-color: #45a049;
+      }
+      .user-info {
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #e8f5e9;
+        border-left: 4px solid #4caf50;
+      }
+      .error-message {
+        color: red;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+      }
+    </style>
+    <script>
+      let availableCars = [];
+      let bookings = [];
+      let userId =
+        localStorage.getItem("userId") ||
+        "USER-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+      localStorage.setItem("userId", userId);
+
+      // Load available cars from XML
+      async function loadAvailableCars() {
+        try {
+          const response = await fetch("available-cars.xml");
+          const text = await response.text();
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, "text/xml");
+
+          availableCars = [];
+          const carElements = xmlDoc.getElementsByTagName("car");
+
+          for (let i = 0; i < carElements.length; i++) {
+            const car = carElements[i];
+            availableCars.push({
+              carId: car.getElementsByTagName("car-id")[0].textContent.trim(),
+              city: car.getElementsByTagName("city")[0].textContent.trim(),
+              type: car.getElementsByTagName("type")[0].textContent.trim(),
+              checkIn: car
+                .getElementsByTagName("check-in")[0]
+                .textContent.trim(),
+              checkOut: car
+                .getElementsByTagName("check-out")[0]
+                .textContent.trim(),
+              pricePerDay: parseFloat(
+                car.getElementsByTagName("price-per-day")[0].textContent.trim()
+              ),
+            });
+          }
+        } catch (error) {
+          console.error("Error loading available cars:", error);
+        }
+      }
+
+      // Load bookings from XML or localStorage
+      async function loadBookings() {
+        bookings = [];
+
+        // First, try to load from localStorage (persistent storage)
+        const storedBookings = localStorage.getItem("carBookings");
+        if (storedBookings) {
+          try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(storedBookings, "text/xml");
+            const bookingElements = xmlDoc.getElementsByTagName("booking");
+
+            for (let i = 0; i < bookingElements.length; i++) {
+              const booking = bookingElements[i];
+              const userIdEl = booking.getElementsByTagName("user-id")[0];
+              const bookingNumberEl =
+                booking.getElementsByTagName("booking-number")[0];
+              const carIdEl = booking.getElementsByTagName("car-id")[0];
+              const cityEl = booking.getElementsByTagName("city")[0];
+              const typeEl = booking.getElementsByTagName("type")[0];
+              const checkInEl = booking.getElementsByTagName("check-in")[0];
+              const checkOutEl = booking.getElementsByTagName("check-out")[0];
+              const pricePerDayEl =
+                booking.getElementsByTagName("price-per-day")[0];
+              const totalPriceEl =
+                booking.getElementsByTagName("total-price")[0];
+
+              if (
+                userIdEl &&
+                bookingNumberEl &&
+                carIdEl &&
+                cityEl &&
+                typeEl &&
+                checkInEl &&
+                checkOutEl &&
+                pricePerDayEl &&
+                totalPriceEl
+              ) {
+                bookings.push({
+                  userId: userIdEl.textContent.trim(),
+                  bookingNumber: bookingNumberEl.textContent.trim(),
+                  carId: carIdEl.textContent.trim(),
+                  city: cityEl.textContent.trim(),
+                  type: typeEl.textContent.trim(),
+                  checkIn: checkInEl.textContent.trim(),
+                  checkOut: checkOutEl.textContent.trim(),
+                  pricePerDay: parseFloat(pricePerDayEl.textContent.trim()),
+                  totalPrice: parseFloat(totalPriceEl.textContent.trim()),
+                });
+              }
+            }
+            return; // Successfully loaded from localStorage
+          } catch (error) {
+            console.error("Error parsing stored bookings:", error);
+          }
+        }
+
+        // Fall back to loading from XML file if localStorage is empty
+        try {
+          const response = await fetch("bookings.xml");
+          if (!response.ok) {
+            return;
+          }
+          const text = await response.text();
+          if (
+            !text ||
+            text.trim() === "" ||
+            text.includes("<bookings></bookings>")
+          ) {
+            return;
+          }
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, "text/xml");
+          const bookingElements = xmlDoc.getElementsByTagName("booking");
+
+          for (let i = 0; i < bookingElements.length; i++) {
+            const booking = bookingElements[i];
+            const userIdEl = booking.getElementsByTagName("user-id")[0];
+            const bookingNumberEl =
+              booking.getElementsByTagName("booking-number")[0];
+            const carIdEl = booking.getElementsByTagName("car-id")[0];
+            const cityEl = booking.getElementsByTagName("city")[0];
+            const typeEl = booking.getElementsByTagName("type")[0];
+            const checkInEl = booking.getElementsByTagName("check-in")[0];
+            const checkOutEl = booking.getElementsByTagName("check-out")[0];
+            const pricePerDayEl =
+              booking.getElementsByTagName("price-per-day")[0];
+            const totalPriceEl = booking.getElementsByTagName("total-price")[0];
+
+            if (
+              userIdEl &&
+              bookingNumberEl &&
+              carIdEl &&
+              cityEl &&
+              typeEl &&
+              checkInEl &&
+              checkOutEl &&
+              pricePerDayEl &&
+              totalPriceEl
+            ) {
+              bookings.push({
+                userId: userIdEl.textContent.trim(),
+                bookingNumber: bookingNumberEl.textContent.trim(),
+                carId: carIdEl.textContent.trim(),
+                city: cityEl.textContent.trim(),
+                type: typeEl.textContent.trim(),
+                checkIn: checkInEl.textContent.trim(),
+                checkOut: checkOutEl.textContent.trim(),
+                pricePerDay: parseFloat(pricePerDayEl.textContent.trim()),
+                totalPrice: parseFloat(totalPriceEl.textContent.trim()),
+              });
+            }
+          }
+          // Save loaded bookings to localStorage for future use
+          if (bookings.length > 0) {
+            const xmlString = generateBookingsXML();
+            localStorage.setItem("carBookings", xmlString);
+          }
+        } catch (error) {
+          console.error("Error loading bookings from XML:", error);
+        }
+      }
+
+      // Helper function to generate bookings XML string
+      function generateBookingsXML() {
+        return `<?xml version="1.0" encoding="UTF-8"?>
+<bookings>
+${bookings
+  .map(
+    (booking) => `  <booking>
+    <user-id>${booking.userId}</user-id>
+    <booking-number>${booking.bookingNumber}</booking-number>
+    <car-id>${booking.carId}</car-id>
+    <city>${booking.city}</city>
+    <type>${booking.type}</type>
+    <check-in>${booking.checkIn}</check-in>
+    <check-out>${booking.checkOut}</check-out>
+    <price-per-day>${booking.pricePerDay}</price-per-day>
+    <total-price>${booking.totalPrice}</total-price>
+  </booking>`
+  )
+  .join("\n")}
+</bookings>`;
+      }
+
+      // Get user's previous booking preferences
+      function getUserPreferences() {
+        const userBookings = bookings.filter((b) => b.userId === userId);
+        if (userBookings.length === 0) return null;
+
+        // Get most common preferences
+        const cities = {};
+        const types = {};
+        userBookings.forEach((b) => {
+          cities[b.city] = (cities[b.city] || 0) + 1;
+          types[b.type] = (types[b.type] || 0) + 1;
+        });
+
+        const preferredCity = Object.keys(cities).reduce((a, b) =>
+          cities[a] > cities[b] ? a : b
+        );
+        const preferredType = Object.keys(types).reduce((a, b) =>
+          types[a] > types[b] ? a : b
+        );
+
+        return { city: preferredCity, type: preferredType };
+      }
+
+      // Find suggested cars based on user preferences and search criteria
+      function findSuggestedCars(
+        userCity,
+        userType,
+        userCheckIn,
+        userCheckOut
+      ) {
+        const preferences = getUserPreferences();
+        const suggestions = [];
+
+        availableCars.forEach((car) => {
+          // Check if dates overlap
+          const carCheckIn = new Date(car.checkIn);
+          const carCheckOut = new Date(car.checkOut);
+          const userCheckInDate = new Date(userCheckIn);
+          const userCheckOutDate = new Date(userCheckOut);
+
+          // Check if car is available for the requested dates
+          const datesOverlap = !(
+            userCheckOutDate <= carCheckIn || userCheckInDate >= carCheckOut
+          );
+
+          if (datesOverlap) {
+            let score = 0;
+
+            // Match city
+            if (car.city.toLowerCase() === userCity.toLowerCase()) {
+              score += 10;
+            } else if (preferences && car.city === preferences.city) {
+              score += 5;
+            }
+
+            // Match type (case-insensitive)
+            if (car.type.toLowerCase() === userType.toLowerCase()) {
+              score += 10;
+            } else if (
+              preferences &&
+              car.type.toLowerCase() === preferences.type.toLowerCase()
+            ) {
+              score += 5;
+            }
+
+            if (score > 0) {
+              suggestions.push({ ...car, score });
+            }
+          }
+        });
+
+        // Sort by score (highest first)
+        suggestions.sort((a, b) => b.score - a.score);
+        return suggestions.slice(0, 5); // Return top 5 suggestions
+      }
+
+      // Display suggested cars
+      function displaySuggestedCars(suggestions) {
+        const suggestionsDiv = document.getElementById("suggestions");
+        if (!suggestionsDiv) return;
+
+        // Clear previous suggestions
+        suggestionsDiv.innerHTML = "";
+
+        if (suggestions.length === 0) {
+          const noResults = document.createElement("p");
+          noResults.textContent =
+            "No matching cars found for your search criteria.";
+          suggestionsDiv.appendChild(noResults);
+          return;
+        }
+
+        const heading = document.createElement("h3");
+        heading.textContent = "Suggested Cars Based on Your Preferences:";
+        suggestionsDiv.appendChild(heading);
+
+        suggestions.forEach((car) => {
+          const carDiv = document.createElement("div");
+          carDiv.className = "car-item";
+
+          const days = Math.ceil(
+            (new Date(car.checkOut) - new Date(car.checkIn)) /
+              (1000 * 60 * 60 * 24)
+          );
+          const totalPrice = car.pricePerDay * days;
+
+          const title = document.createElement("h4");
+          title.textContent = `${
+            car.type.charAt(0).toUpperCase() + car.type.slice(1)
+          } - ${car.city}`;
+          carDiv.appendChild(title);
+
+          const carId = document.createElement("p");
+          carId.textContent = `Car ID: ${car.carId}`;
+          carDiv.appendChild(carId);
+
+          const dates = document.createElement("p");
+          dates.textContent = `Available: ${car.checkIn} to ${car.checkOut}`;
+          carDiv.appendChild(dates);
+
+          const price = document.createElement("p");
+          price.textContent = `Price: $${
+            car.pricePerDay
+          }/day (Total: $${totalPrice.toFixed(2)} for ${days} days)`;
+          carDiv.appendChild(price);
+
+          const bookBtn = document.createElement("button");
+          bookBtn.className = "book-btn";
+          bookBtn.textContent = "Book This Car";
+          bookBtn.onclick = () => {
+            const checkInInput = document.getElementById("checkIn");
+            const checkOutInput = document.getElementById("checkOut");
+            bookCar(car, checkInInput.value, checkOutInput.value);
+          };
+          carDiv.appendChild(bookBtn);
+
+          suggestionsDiv.appendChild(carDiv);
+        });
+      }
+
+      // Book a car
+      async function bookCar(car, userCheckIn, userCheckOut) {
+        const days = Math.ceil(
+          (new Date(userCheckOut) - new Date(userCheckIn)) /
+            (1000 * 60 * 60 * 24)
+        );
+        const totalPrice = car.pricePerDay * days;
+        const bookingNumber =
+          "BK-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+        // Create booking record
+        const booking = {
+          userId: userId,
+          bookingNumber: bookingNumber,
+          carId: car.carId,
+          city: car.city,
+          type: car.type,
+          checkIn: userCheckIn,
+          checkOut: userCheckOut,
+          pricePerDay: car.pricePerDay,
+          totalPrice: totalPrice,
+        };
+
+        // Add to bookings array
+        bookings.push(booking);
+
+        // Save bookings to XML
+        await saveBookingsToXML();
+
+        // Update available cars XML (remove booked car or update dates)
+        await updateAvailableCarsXML(car.carId, userCheckIn, userCheckOut);
+
+        alert(`Car booked successfully! Booking Number: ${bookingNumber}`);
+
+        // Reload available cars
+        await loadAvailableCars();
+
+        // Refresh booked cars display
+        displayBookedCars();
+
+        // Refresh suggestions if form is still filled
+        const cityInput = document.getElementById("city");
+        const carTypeInput = document.getElementById("carType");
+        const checkInInput = document.getElementById("checkIn");
+        const checkOutInput = document.getElementById("checkOut");
+
+        if (cityInput.value && checkInInput.value && checkOutInput.value) {
+          const suggestions = findSuggestedCars(
+            cityInput.value.trim(),
+            carTypeInput.value,
+            checkInInput.value,
+            checkOutInput.value
+          );
+          displaySuggestedCars(suggestions);
+        }
+      }
+
+      // Save bookings to XML (localStorage for persistence)
+      async function saveBookingsToXML() {
+        const xmlString = generateBookingsXML();
+
+        // Save to localStorage for persistence across page loads
+        localStorage.setItem("carBookings", xmlString);
+
+        // Note: In a client-side application, we cannot directly write to server files.
+        // The bookings are persisted in localStorage and will be loaded on page reload.
+        // If you need to download the XML file, you can uncomment the code below:
+        /*
+        const blob = new Blob([xmlString], { type: "application/xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "bookings.xml";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        */
+      }
+
+      // Update available cars XML
+      async function updateAvailableCarsXML(carId, userCheckIn, userCheckOut) {
+        // Remove the booked car from available cars
+        availableCars = availableCars.filter((car) => car.carId !== carId);
+
+        const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<cars>
+${availableCars
+  .map(
+    (car) => `  <car>
+    <car-id>${car.carId}</car-id>
+    <city>${car.city}</city>
+    <type>${car.type}</type>
+    <check-in>${car.checkIn}</check-in>
+    <check-out>${car.checkOut}</check-out>
+    <price-per-day>${car.pricePerDay}</price-per-day>
+  </car>`
+  )
+  .join("\n")}
+</cars>`;
+
+        // Store in localStorage as backup
+        localStorage.setItem("availableCars", xmlString);
+
+        // Try to download the updated XML file
+        const blob = new Blob([xmlString], { type: "application/xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "available-cars.xml";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Validate and process form
       function validateCars(event) {
         event.preventDefault();
-        const city = document.getElementById("city").value.trim();
-        const carType = document.getElementById("carType").value;
-        const checkIn = new Date(document.getElementById("checkIn").value);
-        const checkOut = new Date(document.getElementById("checkOut").value);
 
-        const validCars = ["economy", "SUV", "compact", "midsize"];
+        // Clear previous messages
+        const errorDiv = document.getElementById("error-message");
+        const userInfoDiv = document.getElementById("user-info");
+        const listDiv = document.querySelector(".list");
+
+        if (errorDiv) errorDiv.remove();
+        if (userInfoDiv) userInfoDiv.remove();
+        listDiv.innerHTML = "";
+
+        // Get form values using DOM methods
+        const cityInput = document.getElementById("city");
+        const carTypeInput = document.getElementById("carType");
+        const checkInInput = document.getElementById("checkIn");
+        const checkOutInput = document.getElementById("checkOut");
+
+        const city = cityInput.value.trim();
+        const carType = carTypeInput.value;
+        const checkInStr = checkInInput.value;
+        const checkOutStr = checkOutInput.value;
+
+        // Validation
         const dateMin = new Date("2024-09-01");
         const dateMax = new Date("2024-12-01");
 
-        if (!validCars.includes(carType))
-          return alert("Car must be economy, SUV, compact, or midsize.");
+        if (!city) {
+          showError("Please enter a city name.");
+          return;
+        }
+
+        // Normalize car type for validation (handle Compact vs compact)
+        const normalizedCarType = carType.toLowerCase();
+        const validCarTypes = ["economy", "suv", "compact", "midsize"];
+        if (!validCarTypes.includes(normalizedCarType)) {
+          showError("Car type must be economy, SUV, Compact, or midsize.");
+          return;
+        }
+
+        if (!checkInStr || !checkOutStr) {
+          showError("Please enter both check-in and check-out dates.");
+          return;
+        }
+
+        const checkIn = new Date(checkInStr);
+        const checkOut = new Date(checkOutStr);
+
         if (
           checkIn < dateMin ||
           checkIn > dateMax ||
           checkOut < dateMin ||
           checkOut > dateMax
-        )
-          return alert("Dates must be between Sep 1 and Dec 1, 2024.");
-        if (checkOut <= checkIn)
-          return alert("Check-out must be after check-in.");
+        ) {
+          showError(
+            "Dates must be between September 1, 2024 and December 1, 2024."
+          );
+          return;
+        }
 
-        const output = document.createElement("p");
-        const car_list = document.querySelector(".list");
-        output.textContent = `City: ${city}, Car: ${carType}, Check-In: ${checkIn.toDateString()}, Check-Out: ${checkOut.toDateString()}`;
-        car_list.appendChild(output);
+        if (checkOut <= checkIn) {
+          showError("Check-out date must be after check-in date.");
+          return;
+        }
+
+        // Display user information
+        displayUserInfo(city, carType, checkIn, checkOut);
+
+        // Find and display suggested cars
+        const suggestions = findSuggestedCars(
+          city,
+          carType,
+          checkInStr,
+          checkOutStr
+        );
+        displaySuggestedCars(suggestions);
       }
+
+      // Show error message
+      function showError(message) {
+        const form = document.querySelector("form");
+        const errorDiv = document.createElement("div");
+        errorDiv.id = "error-message";
+        errorDiv.className = "error-message";
+        errorDiv.textContent = message;
+        form.parentNode.insertBefore(errorDiv, form.nextSibling);
+      }
+
+      // Display user information
+      function displayUserInfo(city, carType, checkIn, checkOut) {
+        const listDiv = document.querySelector(".list");
+        const userInfoDiv = document.createElement("div");
+        userInfoDiv.id = "user-info";
+        userInfoDiv.className = "user-info";
+
+        const heading = document.createElement("h3");
+        heading.textContent = "Your Search Information:";
+        userInfoDiv.appendChild(heading);
+
+        const infoList = document.createElement("ul");
+        const cityItem = document.createElement("li");
+        cityItem.textContent = `City: ${city}`;
+        infoList.appendChild(cityItem);
+
+        const typeItem = document.createElement("li");
+        typeItem.textContent = `Car Type: ${
+          carType.charAt(0).toUpperCase() + carType.slice(1)
+        }`;
+        infoList.appendChild(typeItem);
+
+        const checkInItem = document.createElement("li");
+        checkInItem.textContent = `Check-In Date: ${checkIn.toDateString()}`;
+        infoList.appendChild(checkInItem);
+
+        const checkOutItem = document.createElement("li");
+        checkOutItem.textContent = `Check-Out Date: ${checkOut.toDateString()}`;
+        infoList.appendChild(checkOutItem);
+
+        userInfoDiv.appendChild(infoList);
+        listDiv.appendChild(userInfoDiv);
+      }
+
+      // Display booked cars
+      function displayBookedCars() {
+        const bookedCarsDiv = document.getElementById("booked-cars");
+        if (!bookedCarsDiv) return;
+
+        // Filter bookings for current user
+        const userBookings = bookings.filter((b) => b.userId === userId);
+
+        // Clear previous content
+        bookedCarsDiv.innerHTML = "";
+
+        if (userBookings.length === 0) {
+          const noBookings = document.createElement("p");
+          noBookings.textContent = "You have no car bookings yet.";
+          noBookings.style.color = "#666";
+          bookedCarsDiv.appendChild(noBookings);
+          return;
+        }
+
+        const heading = document.createElement("h3");
+        heading.textContent = "Your Booked Cars:";
+        bookedCarsDiv.appendChild(heading);
+
+        const table = document.createElement("table");
+        table.className = "table";
+        table.style.width = "100%";
+        table.style.marginTop = "10px";
+
+        // Create table header
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        const headers = [
+          "Booking #",
+          "Car ID",
+          "City",
+          "Type",
+          "Check-In",
+          "Check-Out",
+          "Price/Day",
+          "Total Price",
+        ];
+        headers.forEach((headerText) => {
+          const th = document.createElement("th");
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement("tbody");
+        userBookings.forEach((booking) => {
+          const row = document.createElement("tr");
+
+          const bookingNum = document.createElement("td");
+          bookingNum.textContent = booking.bookingNumber;
+          row.appendChild(bookingNum);
+
+          const carId = document.createElement("td");
+          carId.textContent = booking.carId;
+          row.appendChild(carId);
+
+          const city = document.createElement("td");
+          city.textContent = booking.city;
+          row.appendChild(city);
+
+          const type = document.createElement("td");
+          type.textContent =
+            booking.type.charAt(0).toUpperCase() + booking.type.slice(1);
+          row.appendChild(type);
+
+          const checkIn = document.createElement("td");
+          checkIn.textContent = booking.checkIn;
+          row.appendChild(checkIn);
+
+          const checkOut = document.createElement("td");
+          checkOut.textContent = booking.checkOut;
+          row.appendChild(checkOut);
+
+          const pricePerDay = document.createElement("td");
+          pricePerDay.textContent = "$" + booking.pricePerDay.toFixed(2);
+          row.appendChild(pricePerDay);
+
+          const totalPrice = document.createElement("td");
+          totalPrice.textContent = "$" + booking.totalPrice.toFixed(2);
+          totalPrice.style.fontWeight = "bold";
+          row.appendChild(totalPrice);
+
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        bookedCarsDiv.appendChild(table);
+      }
+
+      // Initialize on page load
+      window.addEventListener("DOMContentLoaded", async () => {
+        await loadBookings();
+        await loadAvailableCars();
+        displayBookedCars();
+      });
     </script>
   </head>
   <body onload="showDateTime()">
@@ -78,6 +762,12 @@
           <button type="submit">Submit</button>
         </form>
         <div class="list"></div>
+        <div id="suggestions" class="car-suggestions"></div>
+        <div
+          id="booked-cars"
+          class="car-suggestions"
+          style="margin-top: 30px"
+        ></div>
       </div>
     </main>
     <footer>

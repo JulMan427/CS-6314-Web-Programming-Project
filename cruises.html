@@ -6,44 +6,145 @@
     <link rel="stylesheet" href="mystyle.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="script.js" defer></script>
+    <style>
+      .error-message {
+        color: red;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+      }
+      .user-info {
+        margin: 15px 0;
+        padding: 15px;
+        background-color: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        border-radius: 4px;
+      }
+      .user-info h3 {
+        margin-top: 0;
+      }
+      .user-info ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .user-info li {
+        margin: 5px 0;
+      }
+    </style>
     <script defer>
       $(document).ready(function () {
+        // Clear any previous error messages
+        $("#error-message").remove();
+
         $("#cruiseForm").submit(function (e) {
           e.preventDefault();
 
-          const destination = $("#destination").val().trim();
-          const depart = new Date($("#departDate").val());
-          const minDays = parseInt($("#minDays").val());
-          const maxDays = parseInt($("#maxDays").val());
-          const adults = parseInt($("#adults").val());
-          const children = parseInt($("#children").val());
-          const infants = parseInt($("#infants").val());
+          // Clear previous messages
+          $("#error-message").remove();
+          $("#result").empty();
 
+          // Get form values using jQuery
+          const destination = $("#destination").val().trim();
+          const departStart = $("#departStart").val();
+          const departEnd = $("#departEnd").val();
+          const minDays = parseInt($("#minDays").val()) || 0;
+          const maxDays = parseInt($("#maxDays").val()) || 0;
+          const adults = parseInt($("#adults").val()) || 0;
+          const children = parseInt($("#children").val()) || 0;
+          const infants = parseInt($("#infants").val()) || 0;
+
+          // Validation
           const validDestinations = ["Alaska", "Bahamas", "Europe", "Mexico"];
           const dateMin = new Date("2024-09-01");
           const dateMax = new Date("2024-12-01");
 
-          if (!validDestinations.includes(destination))
-            return alert(
-              "Destination must be Alaska, Bahamas, Europe, or Mexico."
-            );
-          if (minDays < 3 || maxDays > 10 || minDays > maxDays)
-            return alert("Duration must be between 3–10 days.");
-          if (depart < dateMin || depart > dateMax)
-            return alert("Departure must be between Sep 1 and Dec 1, 2024.");
-          if (adults > 2 || children > 2)
-            return alert("No more than 2 guests per room (infants allowed).");
+          let errorMessage = "";
 
+          // Validate destination
+          if (!destination) {
+            errorMessage = "Please enter a destination.";
+          } else if (!validDestinations.includes(destination)) {
+            errorMessage =
+              "Destination must be Alaska, Bahamas, Europe, or Mexico.";
+          }
+
+          // Validate departing between dates
+          if (!errorMessage) {
+            if (!departStart || !departEnd) {
+              errorMessage =
+                "Please enter both start and end dates for departing between.";
+            } else {
+              const startDate = new Date(departStart);
+              const endDate = new Date(departEnd);
+
+              if (startDate < dateMin || startDate > dateMax) {
+                errorMessage =
+                  "Start date must be between September 1, 2024 and December 1, 2024.";
+              } else if (endDate < dateMin || endDate > dateMax) {
+                errorMessage =
+                  "End date must be between September 1, 2024 and December 1, 2024.";
+              } else if (endDate < startDate) {
+                errorMessage = "End date must be after or equal to start date.";
+              }
+            }
+          }
+
+          // Validate duration
+          if (!errorMessage) {
+            if (minDays < 3) {
+              errorMessage = "Minimum duration cannot be less than 3 days.";
+            } else if (maxDays > 10) {
+              errorMessage = "Maximum duration cannot be greater than 10 days.";
+            } else if (minDays > maxDays) {
+              errorMessage =
+                "Minimum duration cannot be greater than maximum duration.";
+            }
+          }
+
+          // Validate number of guests
+          // Requirement: "Number of guests can not be more than 2 for each room. However infants can stay with adults even if the number of guesses exceeds 2"
+          // This means: Each room can have at most 2 non-infant guests (adults + children)
+          // Infants don't count toward the 2-guest limit
+          // Room allocation is calculated automatically (Math.ceil((adults + children) / 2))
+          // No additional validation needed as the allocation ensures max 2 per room
+
+          // Display error if validation failed
+          if (errorMessage) {
+            const errorDiv = $("<div>")
+              .attr("id", "error-message")
+              .addClass("error-message")
+              .text(errorMessage);
+            $("#cruiseForm").after(errorDiv);
+            return;
+          }
+
+          // Calculate rooms needed (infants don't count)
           const nonInfantGuests = adults + children;
-          const rooms = Math.ceil(nonInfantGuests / 2);
+          const roomsNeeded = Math.ceil(nonInfantGuests / 2);
 
-          $("#result").html(`
-          <strong>Destination:</strong> ${destination}<br>
-          <strong>Depart:</strong> ${depart.toDateString()}<br>
-          <strong>Duration:</strong> ${minDays} - ${maxDays} days<br>
-          <strong>Guests:</strong> Adults ${adults}, Children ${children}, Infants ${infants}
-          <strong>Rooms needed: ${rooms} <strong>
-        `);
+          // Display all entered information using jQuery
+          const startDate = new Date(departStart);
+          const endDate = new Date(departEnd);
+
+          const resultDiv = $("<div>").addClass("user-info").html(`
+              <h3>Your Cruise Search Information:</h3>
+              <ul>
+                <li><strong>Destination:</strong> ${destination}</li>
+                <li><strong>Departing Between:</strong> ${startDate.toDateString()} to ${endDate.toDateString()}</li>
+                <li><strong>Duration:</strong> ${minDays} - ${maxDays} days</li>
+                <li><strong>Number of Guests:</strong></li>
+                <ul>
+                  <li>Adults: ${adults}</li>
+                  <li>Children: ${children}</li>
+                  <li>Infants: ${infants}</li>
+                </ul>
+                <li><strong>Total Non-Infant Guests:</strong> ${nonInfantGuests}</li>
+                <li><strong>Rooms Needed:</strong> ${roomsNeeded} (Infants can stay with adults and don't count toward the 2-guest per room limit)</li>
+              </ul>
+            `);
+
+          $("#result").empty().append(resultDiv);
         });
       });
     </script>
@@ -72,41 +173,51 @@
       <div class="main-content">
         <form id="cruiseForm">
           <label
-            >Destination: <input type="text" id="destination" required /></label
-          ><br />
+            >Destination:
+            <select id="destination" required>
+              <option value="">Select a destination</option>
+              <option value="Alaska">Alaska</option>
+              <option value="Bahamas">Bahamas</option>
+              <option value="Europe">Europe</option>
+              <option value="Mexico">Mexico</option>
+            </select>
+          </label>
+          <br />
           <label
-            >Departure Date:
-            <input type="date" id="departDate" required /></label
-          ><br />
+            >Departing Between (Start Date):
+            <input type="date" id="departStart" required />
+          </label>
+          <br />
           <label
-            >Min Duration:
-            <input
-              type="number"
-              id="minDays"
-              min="3"
-              max="10"
-              required /></label
-          ><br />
+            >Departing Between (End Date):
+            <input type="date" id="departEnd" required />
+          </label>
+          <br />
           <label
-            >Max Duration:
-            <input
-              type="number"
-              id="maxDays"
-              min="3"
-              max="10"
-              required /></label
-          ><br />
+            >Minimum Duration (days):
+            <input type="number" id="minDays" min="3" max="10" required />
+          </label>
+          <br />
           <label
-            >Adults: <input type="number" id="adults" min="0" max="4" /></label
-          ><br />
+            >Maximum Duration (days):
+            <input type="number" id="maxDays" min="3" max="10" required />
+          </label>
+          <br />
           <label
-            >Children:
-            <input type="number" id="children" min="0" max="4" /></label
-          ><br />
+            >Number of Adults:
+            <input type="number" id="adults" min="0" value="0" />
+          </label>
+          <br />
           <label
-            >Infants:
-            <input type="number" id="infants" min="0" max="4" /></label
-          ><br />
+            >Number of Children:
+            <input type="number" id="children" min="0" value="0" />
+          </label>
+          <br />
+          <label
+            >Number of Infants:
+            <input type="number" id="infants" min="0" value="0" />
+          </label>
+          <br />
           <button type="submit">Submit</button>
         </form>
         <div id="result" style="margin-top: 20px"></div>
