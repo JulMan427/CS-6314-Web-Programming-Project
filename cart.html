@@ -1,325 +1,451 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Cart</title>
-  <link rel="stylesheet" href="mystyle.css">
-  <script src="script.js" defer></script>
-  <script>
-    var cart = null;
-    var pax = { adults: 0, children: 0, infants: 0 };
-    var carBookings = [];
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cart</title>
+    <link rel="stylesheet" href="mystyle.css" />
+    <script src="script.js" defer></script>
+    <script>
+      var cart = null;
+      var pax = { adults: 0, children: 0, infants: 0 };
+      var carBookings = [];
 
-    // Load car bookings from localStorage
-    async function loadCarBookings() {
-      try {
-        const storedBookings = localStorage.getItem("carBookings");
-        if (!storedBookings) {
+      // Load car bookings from localStorage
+      async function loadCarBookings() {
+        try {
+          const storedBookings = localStorage.getItem("carBookings");
+          if (!storedBookings) {
+            carBookings = [];
+            return;
+          }
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(storedBookings, "text/xml");
+          const bookingElements = xmlDoc.getElementsByTagName("booking");
+
           carBookings = [];
-          return;
-        }
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(storedBookings, "text/xml");
-        const bookingElements = xmlDoc.getElementsByTagName("booking");
-        
-        carBookings = [];
-        const userId = localStorage.getItem("userId") || "";
-        
-        for (let i = 0; i < bookingElements.length; i++) {
-          const booking = bookingElements[i];
-          const userIdEl = booking.getElementsByTagName("user-id")[0];
-          const bookingNumberEl = booking.getElementsByTagName("booking-number")[0];
-          const carIdEl = booking.getElementsByTagName("car-id")[0];
-          const cityEl = booking.getElementsByTagName("city")[0];
-          const typeEl = booking.getElementsByTagName("type")[0];
-          const checkInEl = booking.getElementsByTagName("check-in")[0];
-          const checkOutEl = booking.getElementsByTagName("check-out")[0];
-          const pricePerDayEl = booking.getElementsByTagName("price-per-day")[0];
-          const totalPriceEl = booking.getElementsByTagName("total-price")[0];
-          
-          if (userIdEl && bookingNumberEl && carIdEl && cityEl && typeEl && 
-              checkInEl && checkOutEl && pricePerDayEl && totalPriceEl) {
-            const bookingUserId = userIdEl.textContent.trim();
-            // Only show bookings for current user
-            if (bookingUserId === userId) {
-              carBookings.push({
-                userId: bookingUserId,
-                bookingNumber: bookingNumberEl.textContent.trim(),
-                carId: carIdEl.textContent.trim(),
-                city: cityEl.textContent.trim(),
-                type: typeEl.textContent.trim(),
-                checkIn: checkInEl.textContent.trim(),
-                checkOut: checkOutEl.textContent.trim(),
-                pricePerDay: parseFloat(pricePerDayEl.textContent.trim()),
-                totalPrice: parseFloat(totalPriceEl.textContent.trim())
-              });
+          const userId = localStorage.getItem("userId") || "";
+
+          for (let i = 0; i < bookingElements.length; i++) {
+            const booking = bookingElements[i];
+            const userIdEl = booking.getElementsByTagName("user-id")[0];
+            const bookingNumberEl =
+              booking.getElementsByTagName("booking-number")[0];
+            const carIdEl = booking.getElementsByTagName("car-id")[0];
+            const cityEl = booking.getElementsByTagName("city")[0];
+            const typeEl = booking.getElementsByTagName("type")[0];
+            const checkInEl = booking.getElementsByTagName("check-in")[0];
+            const checkOutEl = booking.getElementsByTagName("check-out")[0];
+            const pricePerDayEl =
+              booking.getElementsByTagName("price-per-day")[0];
+            const totalPriceEl = booking.getElementsByTagName("total-price")[0];
+
+            if (
+              userIdEl &&
+              bookingNumberEl &&
+              carIdEl &&
+              cityEl &&
+              typeEl &&
+              checkInEl &&
+              checkOutEl &&
+              pricePerDayEl &&
+              totalPriceEl
+            ) {
+              const bookingUserId = userIdEl.textContent.trim();
+              // Only show bookings for current user
+              if (bookingUserId === userId) {
+                carBookings.push({
+                  userId: bookingUserId,
+                  bookingNumber: bookingNumberEl.textContent.trim(),
+                  carId: carIdEl.textContent.trim(),
+                  city: cityEl.textContent.trim(),
+                  type: typeEl.textContent.trim(),
+                  checkIn: checkInEl.textContent.trim(),
+                  checkOut: checkOutEl.textContent.trim(),
+                  pricePerDay: parseFloat(pricePerDayEl.textContent.trim()),
+                  totalPrice: parseFloat(totalPriceEl.textContent.trim()),
+                });
+              }
             }
           }
+        } catch (error) {
+          console.error("Error loading car bookings:", error);
+          carBookings = [];
         }
-      } catch (error) {
-        console.error("Error loading car bookings:", error);
-        carBookings = [];
       }
-    }
 
-    // Display car bookings
-    function displayCarBookings() {
-      const carBookingsDiv = document.getElementById("carBookings");
-      if (!carBookingsDiv) return;
-      
-      carBookingsDiv.innerHTML = "";
-      
-      if (carBookings.length === 0) {
-        return; // Don't show anything if no car bookings
-      }
-      
-      const heading = document.createElement("h3");
-      heading.textContent = "Your Car Bookings:";
-      heading.style.marginTop = "30px";
-      carBookingsDiv.appendChild(heading);
-      
-      const table = document.createElement("table");
-      table.className = "table";
-      table.style.width = "100%";
-      table.style.marginTop = "10px";
-      
-      // Create table header
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      const headers = ["Booking #", "Car ID", "City", "Type", "Check-In", "Check-Out", "Price/Day", "Total Price"];
-      headers.forEach(headerText => {
-        const th = document.createElement("th");
-        th.textContent = headerText;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-      
-      // Create table body
-      const tbody = document.createElement("tbody");
-      carBookings.forEach(booking => {
-        const row = document.createElement("tr");
-        
-        const bookingNum = document.createElement("td");
-        bookingNum.textContent = booking.bookingNumber;
-        row.appendChild(bookingNum);
-        
-        const carId = document.createElement("td");
-        carId.textContent = booking.carId;
-        row.appendChild(carId);
-        
-        const city = document.createElement("td");
-        city.textContent = booking.city;
-        row.appendChild(city);
-        
-        const type = document.createElement("td");
-        type.textContent = booking.type.charAt(0).toUpperCase() + booking.type.slice(1);
-        row.appendChild(type);
-        
-        const checkIn = document.createElement("td");
-        checkIn.textContent = booking.checkIn;
-        row.appendChild(checkIn);
-        
-        const checkOut = document.createElement("td");
-        checkOut.textContent = booking.checkOut;
-        row.appendChild(checkOut);
-        
-        const pricePerDay = document.createElement("td");
-        pricePerDay.textContent = "$" + booking.pricePerDay.toFixed(2);
-        row.appendChild(pricePerDay);
-        
-        const totalPrice = document.createElement("td");
-        totalPrice.textContent = "$" + booking.totalPrice.toFixed(2);
-        totalPrice.style.fontWeight = "bold";
-        row.appendChild(totalPrice);
-        
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
-      carBookingsDiv.appendChild(table);
-    }
+      // Display car bookings
+      function displayCarBookings() {
+        const carBookingsDiv = document.getElementById("carBookings");
+        if (!carBookingsDiv) return;
 
-    document.addEventListener("DOMContentLoaded", async function () {
-      await loadCarBookings();
-      displayCarBookings();
-      
-      cart = getCart();
-      if (!cart || !cart.kind) {
+        carBookingsDiv.innerHTML = "";
+
         if (carBookings.length === 0) {
-          document.getElementById("cartTableWrap").innerHTML = "<p>Cart is empty.</p>";
+          return; // Don't show anything if no car bookings
         }
-        return;
+
+        const heading = document.createElement("h3");
+        heading.textContent = "Your Car Bookings:";
+        heading.style.marginTop = "30px";
+        carBookingsDiv.appendChild(heading);
+
+        const table = document.createElement("table");
+        table.className = "table";
+        table.style.width = "100%";
+        table.style.marginTop = "10px";
+
+        // Create table header
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        const headers = [
+          "Booking #",
+          "Car ID",
+          "City",
+          "Type",
+          "Check-In",
+          "Check-Out",
+          "Price/Day",
+          "Total Price",
+        ];
+        headers.forEach((headerText) => {
+          const th = document.createElement("th");
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement("tbody");
+        carBookings.forEach((booking) => {
+          const row = document.createElement("tr");
+
+          const bookingNum = document.createElement("td");
+          bookingNum.textContent = booking.bookingNumber;
+          row.appendChild(bookingNum);
+
+          const carId = document.createElement("td");
+          carId.textContent = booking.carId;
+          row.appendChild(carId);
+
+          const city = document.createElement("td");
+          city.textContent = booking.city;
+          row.appendChild(city);
+
+          const type = document.createElement("td");
+          type.textContent =
+            booking.type.charAt(0).toUpperCase() + booking.type.slice(1);
+          row.appendChild(type);
+
+          const checkIn = document.createElement("td");
+          checkIn.textContent = booking.checkIn;
+          row.appendChild(checkIn);
+
+          const checkOut = document.createElement("td");
+          checkOut.textContent = booking.checkOut;
+          row.appendChild(checkOut);
+
+          const pricePerDay = document.createElement("td");
+          pricePerDay.textContent = "$" + booking.pricePerDay.toFixed(2);
+          row.appendChild(pricePerDay);
+
+          const totalPrice = document.createElement("td");
+          totalPrice.textContent = "$" + booking.totalPrice.toFixed(2);
+          totalPrice.style.fontWeight = "bold";
+          row.appendChild(totalPrice);
+
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        carBookingsDiv.appendChild(table);
       }
-      pax = cart.pax || { adults: 0, children: 0, infants: 0 };
-      renderCart();
-      buildPassengerForm();
-    });
 
-    function renderCart() {
-      var wrap = document.getElementById("cartTableWrap");
-      var html = "";
-      html += '<table class="table">';
-      html += '<thead><tr><th>Leg</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th></tr></thead>';
-      html += "<tbody>";
+      document.addEventListener("DOMContentLoaded", async function () {
+        await loadCarBookings();
+        displayCarBookings();
 
-      function addRow(f, label) {
-        html += "<tr>";
-        html += "<td>" + label + "</td>";
-        html += "<td>" + f.flightId + "</td>";
-        html += "<td>" + f.origin + " \u2192 " + f.destination + "</td>";
-        html += "<td>" + f.departureDate + " " + f.departureTime + "</td>";
-        html += "<td>" + f.arrivalDate + " " + f.arrivalTime + "</td>";
-        html += "</tr>";
-      }
-
-      if (cart.out) addRow(cart.out, "Depart");
-      if (cart.back) addRow(cart.back, "Return");
-
-      html += "</tbody></table>";
-      wrap.innerHTML = html;
-
-      var base = (cart.out ? cart.out.price : 0) + (cart.back ? cart.back.price : 0);
-      var total = ticketTotal(base, pax.adults, pax.children, pax.infants);
-
-      document.getElementById("cartSummary").innerHTML =
-        '<p class="note">Passengers: ' + pax.adults + " adults, " + pax.children + " children, " + pax.infants + ' infants</p>' +
-        "<p><strong>Total Price:</strong> $" + total.toFixed(2) + "</p>";
-    }
-
-    function buildPassengerForm() {
-      var total = pax.adults + pax.children + pax.infants;
-      var box = document.getElementById("passengersBox");
-      var html = "<h3>Passenger Details</h3>";
-      var i;
-
-      for (i = 1; i <= total; i++) {
-        html += '<fieldset style="margin-bottom:12px;">';
-        html += "<legend>Passenger " + i + "</legend>";
-        html += '<label>First Name <input required id="p' + i + '_fn"></label>';
-        html += '<label>Last Name <input required id="p' + i + '_ln"></label>';
-        html += '<label>Date of Birth <input type="date" required id="p' + i + '_dob"></label>';
-        html += '<label>SSN <input required id="p' + i + '_ssn" placeholder="123-45-6789"></label>';
-        html += "</fieldset>";
-      }
-
-      html += '<button type="button" onclick="bookNow()">Book Flight(s)</button> ';
-      html += '<button type="button" onclick="downloadBookingsJSON()">Download Bookings JSON</button>';
-      box.innerHTML = html;
-    }
-
-    function bookNow() {
-      var paxCount = pax.adults + pax.children + pax.infants;
-      var paxList = [];
-      var i;
-
-      for (i = 1; i <= paxCount; i++) {
-        var fn = document.getElementById("p" + i + "_fn").value.trim();
-        var ln = document.getElementById("p" + i + "_ln").value.trim();
-        var dob = document.getElementById("p" + i + "_dob").value;
-        var ssn = document.getElementById("p" + i + "_ssn").value.trim();
-        if (!fn || !ln || !dob || !ssn) {
-          alert("Please complete all passenger fields.");
+        cart = getCart();
+        if (!cart || !cart.kind) {
+          if (carBookings.length === 0) {
+            document.getElementById("cartTableWrap").innerHTML =
+              "<p>Cart is empty.</p>";
+          }
           return;
         }
-        paxList.push({ firstName: fn, lastName: ln, dob: dob, ssn: ssn });
-      }
+        pax = cart.pax || { adults: 0, children: 0, infants: 0 };
+        renderCart();
+        buildPassengerForm();
+      });
 
-      // Assign booking numbers
-      var userId = uniqueId("USER");
-      var outBk = uniqueId("BOOK");
-      var backBk = cart.kind === "round" ? uniqueId("BOOK") : null;
-
-      // Update seats in inventory
-      var flights = JSON.parse(localStorage.getItem("flightsInventory") || "[]");
-      var need = paxCount;
-
-      function dec(fid) {
-        var idx = -1;
-        var j;
-        for (j = 0; j < flights.length; j++) {
-          if (flights[j].flightId === fid) { idx = j; break; }
+      document.addEventListener("DOMContentLoaded", () => {
+        hotel = localStorage.getItem("hotel") || null;
+        if (!hotel) {
+          document.getElementById("hotelBody").innerHTML =
+            "<p>No booked hotel</p>";
+          return;
         }
-        if (idx >= 0) {
-          var current = flights[idx].availableSeats;
-          flights[idx].availableSeats = Math.max(0, current - need);
+        renderHotel();
+      });
+
+      function renderCart() {
+        var wrap = document.getElementById("cartTableWrap");
+        var html = "";
+        html += '<table class="table">';
+        html +=
+          "<thead><tr><th>Leg</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th></tr></thead>";
+        html += "<tbody>";
+
+        function addRow(f, label) {
+          html += "<tr>";
+          html += "<td>" + label + "</td>";
+          html += "<td>" + f.flightId + "</td>";
+          html += "<td>" + f.origin + " \u2192 " + f.destination + "</td>";
+          html += "<td>" + f.departureDate + " " + f.departureTime + "</td>";
+          html += "<td>" + f.arrivalDate + " " + f.arrivalTime + "</td>";
+          html += "</tr>";
         }
+
+        if (cart.out) addRow(cart.out, "Depart");
+        if (cart.back) addRow(cart.back, "Return");
+
+        html += "</tbody></table>";
+        wrap.innerHTML = html;
+
+        var base =
+          (cart.out ? cart.out.price : 0) + (cart.back ? cart.back.price : 0);
+        var total = ticketTotal(base, pax.adults, pax.children, pax.infants);
+
+        document.getElementById("cartSummary").innerHTML =
+          '<p class="note">Passengers: ' +
+          pax.adults +
+          " adults, " +
+          pax.children +
+          " children, " +
+          pax.infants +
+          " infants</p>" +
+          "<p><strong>Total Price:</strong> $" +
+          total.toFixed(2) +
+          "</p>";
       }
 
-      if (cart.out) dec(cart.out.flightId);
-      if (cart.back) dec(cart.back.flightId);
-      updateFlightsInventory(flights);
+      function buildPassengerForm() {
+        var total = pax.adults + pax.children + pax.infants;
+        var box = document.getElementById("passengersBox");
+        var html = "<h3>Passenger Details</h3>";
+        var i;
 
-      // Save booking record(s)
-      var records = [];
+        for (i = 1; i <= total; i++) {
+          html += '<fieldset style="margin-bottom:12px;">';
+          html += "<legend>Passenger " + i + "</legend>";
+          html +=
+            '<label>First Name <input required id="p' + i + '_fn"></label>';
+          html +=
+            '<label>Last Name <input required id="p' + i + '_ln"></label>';
+          html +=
+            '<label>Date of Birth <input type="date" required id="p' +
+            i +
+            '_dob"></label>';
+          html +=
+            '<label>SSN <input required id="p' +
+            i +
+            '_ssn" placeholder="123-45-6789"></label>';
+          html += "</fieldset>";
+        }
 
-      if (cart.out) {
-        records.push({
-          userId: userId, bookingNumber: outBk, flightId: cart.out.flightId,
-          origin: cart.out.origin, destination: cart.out.destination,
-          departureDate: cart.out.departureDate, arrivalDate: cart.out.arrivalDate,
-          departureTime: cart.out.departureTime, arrivalTime: cart.out.arrivalTime,
-          passengers: paxList
-        });
+        html +=
+          '<button type="button" onclick="bookNow()">Book Flight(s)</button> ';
+        html +=
+          '<button type="button" onclick="downloadBookingsJSON()">Download Bookings JSON</button>';
+        box.innerHTML = html;
       }
-      if (cart.back) {
-        records.push({
-          userId: userId, bookingNumber: backBk, flightId: cart.back.flightId,
-          origin: cart.back.origin, destination: cart.back.destination,
-          departureDate: cart.back.departureDate, arrivalDate: cart.back.arrivalDate,
-          departureTime: cart.back.departureTime, arrivalTime: cart.back.arrivalTime,
-          passengers: paxList
-        });
+
+      function bookNow() {
+        var paxCount = pax.adults + pax.children + pax.infants;
+        var paxList = [];
+        var i;
+
+        for (i = 1; i <= paxCount; i++) {
+          var fn = document.getElementById("p" + i + "_fn").value.trim();
+          var ln = document.getElementById("p" + i + "_ln").value.trim();
+          var dob = document.getElementById("p" + i + "_dob").value;
+          var ssn = document.getElementById("p" + i + "_ssn").value.trim();
+          if (!fn || !ln || !dob || !ssn) {
+            alert("Please complete all passenger fields.");
+            return;
+          }
+          paxList.push({ firstName: fn, lastName: ln, dob: dob, ssn: ssn });
+        }
+
+        // Assign booking numbers
+        var userId = uniqueId("USER");
+        var outBk = uniqueId("BOOK");
+        var backBk = cart.kind === "round" ? uniqueId("BOOK") : null;
+
+        // Update seats in inventory
+        var flights = JSON.parse(
+          localStorage.getItem("flightsInventory") || "[]"
+        );
+        var need = paxCount;
+
+        function dec(fid) {
+          var idx = -1;
+          var j;
+          for (j = 0; j < flights.length; j++) {
+            if (flights[j].flightId === fid) {
+              idx = j;
+              break;
+            }
+          }
+          if (idx >= 0) {
+            var current = flights[idx].availableSeats;
+            flights[idx].availableSeats = Math.max(0, current - need);
+          }
+        }
+
+        if (cart.out) dec(cart.out.flightId);
+        if (cart.back) dec(cart.back.flightId);
+        updateFlightsInventory(flights);
+
+        // Save booking record(s)
+        var records = [];
+
+        if (cart.out) {
+          records.push({
+            userId: userId,
+            bookingNumber: outBk,
+            flightId: cart.out.flightId,
+            origin: cart.out.origin,
+            destination: cart.out.destination,
+            departureDate: cart.out.departureDate,
+            arrivalDate: cart.out.arrivalDate,
+            departureTime: cart.out.departureTime,
+            arrivalTime: cart.out.arrivalTime,
+            passengers: paxList,
+          });
+        }
+        if (cart.back) {
+          records.push({
+            userId: userId,
+            bookingNumber: backBk,
+            flightId: cart.back.flightId,
+            origin: cart.back.origin,
+            destination: cart.back.destination,
+            departureDate: cart.back.departureDate,
+            arrivalDate: cart.back.arrivalDate,
+            departureTime: cart.back.departureTime,
+            arrivalTime: cart.back.arrivalTime,
+            passengers: paxList,
+          });
+        }
+
+        var k;
+        for (k = 0; k < records.length; k++) saveBooking(records[k]);
+
+        var msg = "Booked! Booking numbers:\n";
+        for (k = 0; k < records.length; k++) {
+          msg +=
+            records[k].bookingNumber + (k < records.length - 1 ? ", " : "");
+        }
+        alert(msg);
+
+        clearCart();
+        location.reload();
       }
 
-      var k;
-      for (k = 0; k < records.length; k++) saveBooking(records[k]);
-
-      var msg = "Booked! Booking numbers:\n";
-      for (k = 0; k < records.length; k++) {
-        msg += records[k].bookingNumber + (k < records.length - 1 ? ", " : "");
+      function renderHotel() {
+        let body = document.getElementById("hotelBody");
+        let res = JSON.parse(hotel);
+        body.innerHTML = `<strong>Booked Hotel:</strong><table id=hotel-cart1><tr><th># of Adults</th><th># of Children</th><th># of Infants</th> </tr><tr><td>${res.adults}</td><td>${res.children}</td><td>${res.infants}</td></tr></table><table id=hotel-cart2><tr><th>ID</th><th>Name</th><th>City</th><th>Rooms</th><th>Check In</th><th>Check Out</th><th>Days</th><th>Price Per Night Per Room</th><th>Total Price</th></tr><tr><td>${res.id}</td><td>${res.name}</td><td>${res.city}</td><td>${res.rooms}</td><td>${res.checkIn}</td><td>${res.checkOut}</td><td>${res.days}</td><td>${res.ppn}</td><td>$${res.price}</td></tr></table>`;
+        body.innerHTML += `<button style="margin-right: 3px" onClick="bookHotel()">Book Hotel</button>`;
       }
-      alert(msg);
 
-      clearCart();
-      location.reload();
-    }
-  </script>
-</head>
-<body onload="showDateTime()">
-  <header>
-    <h1>Cart</h1>
-    <p id="datetime"></p>
-  </header>
+      function bookHotel() {
+        let res = JSON.parse(hotel);
+        let bid = uniqueId("HTL");
+        var xml = new XMLHttpRequest();
+        xml.open("GET", "hotels.xml", false);
+        xml.send();
+        var xmlData = xml.responseText;
+        const parser = new DOMParser();
+        let xmlDoc = parser.parseFromString(xmlData, "text/xml");
+        let hotels = xmlDoc.getElementsByTagName("hotel");
+        for (let element of hotels) {
+          let attrs = element.children;
+          if (attrs[0].textContent == res.id) {
+            console.log(
+              (parseInt(attrs[3].textContent) - parseInt(res.rooms)).toString()
+            );
+            attrs[3].textContent = (
+              parseInt(attrs[3].textContent) - parseInt(res.rooms)
+            ).toString();
+            break;
+          }
+          let serializer = new XMLSerializer();
+          xmlString = serializer.serializeToString(xmlDoc);
+        }
+        alert("Hotel has been booked! Your booking ID is: " + bid.toString());
+        localStorage.removeItem("hotel");
+        let obj = localStorage.getItem("hotel-book") || null;
+        var book;
+        if (!obj) {
+          book = { hotels: [] };
+        } else {
+          book = JSON.parse(obj);
+        }
+        book.hotels.push(res);
+        localStorage.setItem("hotel-book", JSON.stringify(book));
+        location.reload();
+      }
+      function downloadHotel() {
+        const data = localStorage.getItem("hotel-book") || "[]";
+        const blob = new Blob([data], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "hotel_bookings.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+    </script>
+  </head>
+  <body onload="showDateTime()">
+    <header>
+      <h1>Cart</h1>
+      <p id="datetime"></p>
+    </header>
 
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="stays.html">Stays</a></li>
-      <li><a href="flights.html">Flights</a></li>
-      <li><a href="cars.html">Cars</a></li>
-      <li><a href="cruises.html">Cruises</a></li>
-      <li><a href="contact-us.html">Contact Us</a></li>
-      <li><a href="cart.html">Cart</a></li>
-    </ul>
-  </nav>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="stays.html">Stays</a></li>
+        <li><a href="flights.html">Flights</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="cruises.html">Cruises</a></li>
+        <li><a href="contact-us.html">Contact Us</a></li>
+        <li><a href="cart.html">Cart</a></li>
+      </ul>
+    </nav>
 
-  <main>
-    <div class="sidebar">
-      <h2>Sidebar</h2>
-    </div>
+    <main>
+      <div class="sidebar">
+        <h2>Sidebar</h2>
+      </div>
 
-    <div class="main-content">
-      <div id="cartTableWrap"></div>
-      <div id="cartSummary" style="margin-top: 10px;"></div>
-      <div id="passengersBox" style="margin-top: 1em;"></div>
-      <div id="carBookings"></div>
-    </div>
-  </main>
+      <div class="main-content">
+        <div id="cartTableWrap"></div>
+        <div id="cartSummary" style="margin-top: 10px"></div>
+        <div id="passengersBox" style="margin-top: 1em"></div>
+        <div id="carBookings"></div>
+        <div id="hotelBody"></div>
+        <button style="width: 20%" onClick="downloadHotel()">
+          Download Hotel Bookings
+        </button>
+      </div>
+    </main>
 
-  <footer>
-    <button onclick="increaseFont()">Increase Font</button>
-    <button onclick="decreaseFont()">Decrease Font</button>
-    <button onclick="changeBackground()">Change Background</button>
-  </footer>
-</body>
+    <footer>
+      <button onclick="increaseFont()">Increase Font</button>
+      <button onclick="decreaseFont()">Decrease Font</button>
+      <button onclick="changeBackground()">Change Background</button>
+    </footer>
+  </body>
 </html>

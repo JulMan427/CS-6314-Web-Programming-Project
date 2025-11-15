@@ -1,0 +1,453 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hotels>
+    <hotel>
+        <hotel-id>1</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/3/2024</start-date>
+        <end-date>10/1/2024</end-date>
+        <price-per-night>$70</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>2</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>9/7/2024</start-date>
+        <end-date>10/7/2024</end-date>
+        <price-per-night>$170</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>3</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>9/6/2024</start-date>
+        <end-date>9/20/2024</end-date>
+        <price-per-night>$100</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>4</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>10/10/2024</start-date>
+        <end-date>10/25/2024</end-date>
+        <price-per-night>$150</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>5</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>9/21/2024</start-date>
+        <end-date>10/13/2024</end-date>
+        <price-per-night>$150</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>6</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>11/10/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$110</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>7</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Austin</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>11/1/2024</start-date>
+        <end-date>11/23/2024</end-date>
+        <price-per-night>$140</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>8</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>11/28/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>9</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>9/14/2024</start-date>
+        <end-date>10/4/2024</end-date>
+        <price-per-night>$60</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>10</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>Austin</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>11/9/2024</start-date>
+        <end-date>11/27/2024</end-date>
+        <price-per-night>$180</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>11</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>11/1/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$90</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>12</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>11/25/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$160</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>13</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/18/2024</start-date>
+        <end-date>10/14/2024</end-date>
+        <price-per-night>$90</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>14</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Austin</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>10/27/2024</start-date>
+        <end-date>11/14/2024</end-date>
+        <price-per-night>$180</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>15</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>11/28/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$50</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>16</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>9/10/2024</start-date>
+        <end-date>9/29/2024</end-date>
+        <price-per-night>$110</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>17</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>11/18/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$90</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>18</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>9/12/2024</start-date>
+        <end-date>10/11/2024</end-date>
+        <price-per-night>$100</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>19</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>9/19/2024</start-date>
+        <end-date>10/8/2024</end-date>
+        <price-per-night>$170</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>20</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>9/21/2024</start-date>
+        <end-date>10/15/2024</end-date>
+        <price-per-night>$180</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>21</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/24/2024</start-date>
+        <end-date>10/21/2024</end-date>
+        <price-per-night>$90</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>22</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>11/12/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>23</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>9/7/2024</start-date>
+        <end-date>9/29/2024</end-date>
+        <price-per-night>$50</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>24</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>10/18/2024</start-date>
+        <end-date>11/5/2024</end-date>
+        <price-per-night>$50</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>25</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>11/2/2024</start-date>
+        <end-date>11/27/2024</end-date>
+        <price-per-night>$90</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>26</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>11/30/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$60</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>27</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>10/8/2024</start-date>
+        <end-date>10/28/2024</end-date>
+        <price-per-night>$80</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>28</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>10/17/2024</start-date>
+        <end-date>11/10/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>29</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Austin</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>10/24/2024</start-date>
+        <end-date>11/3/2024</end-date>
+        <price-per-night>$140</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>30</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>10/9/2024</start-date>
+        <end-date>11/3/2024</end-date>
+        <price-per-night>$80</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>31</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>10/28/2024</start-date>
+        <end-date>11/26/2024</end-date>
+        <price-per-night>$170</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>32</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>San Francisco</city>
+        <number-of-rooms>10</number-of-rooms>
+        <start-date>10/26/2024</start-date>
+        <end-date>11/22/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>33</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>11/2/2024</start-date>
+        <end-date>11/30/2024</end-date>
+        <price-per-night>$100</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>34</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>9/25/2024</start-date>
+        <end-date>10/7/2024</end-date>
+        <price-per-night>$80</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>35</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/7/2024</start-date>
+        <end-date>9/22/2024</end-date>
+        <price-per-night>$160</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>36</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/3/2024</start-date>
+        <end-date>10/2/2024</end-date>
+        <price-per-night>$180</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>37</hotel-id>
+        <hotel-name>Hilton</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>9/7/2024</start-date>
+        <end-date>10/4/2024</end-date>
+        <price-per-night>$100</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>38</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>10/9/2024</start-date>
+        <end-date>11/7/2024</end-date>
+        <price-per-night>$180</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>39</hotel-id>
+        <hotel-name>Hampton</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>9/18/2024</start-date>
+        <end-date>10/4/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>40</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>9</number-of-rooms>
+        <start-date>11/19/2024</start-date>
+        <end-date>12/01/2024</end-date>
+        <price-per-night>$130</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>41</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>9/30/2024</start-date>
+        <end-date>10/18/2024</end-date>
+        <price-per-night>$80</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>42</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Houston</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>9/25/2024</start-date>
+        <end-date>10/7/2024</end-date>
+        <price-per-night>$110</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>43</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Dallas</city>
+        <number-of-rooms>5</number-of-rooms>
+        <start-date>9/13/2024</start-date>
+        <end-date>10/12/2024</end-date>
+        <price-per-night>$170</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>44</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>9/11/2024</start-date>
+        <end-date>9/24/2024</end-date>
+        <price-per-night>$150</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>45</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>San Antonio</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>11/15/2024</start-date>
+        <end-date>11/27/2024</end-date>
+        <price-per-night>$130</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>46</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>9/12/2024</start-date>
+        <end-date>10/6/2024</end-date>
+        <price-per-night>$170</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>47</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>San Diego</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>10/5/2024</start-date>
+        <end-date>10/15/2024</end-date>
+        <price-per-night>$130</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>48</hotel-id>
+        <hotel-name>Holiday Inn</hotel-name>
+        <city>Austin</city>
+        <number-of-rooms>7</number-of-rooms>
+        <start-date>10/23/2024</start-date>
+        <end-date>11/2/2024</end-date>
+        <price-per-night>$70</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>49</hotel-id>
+        <hotel-name>Residence Inn</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>6</number-of-rooms>
+        <start-date>11/10/2024</start-date>
+        <end-date>11/22/2024</end-date>
+        <price-per-night>$140</price-per-night>
+    </hotel>
+    <hotel>
+        <hotel-id>50</hotel-id>
+        <hotel-name>Quality Inn</hotel-name>
+        <city>Los Angeles</city>
+        <number-of-rooms>8</number-of-rooms>
+        <start-date>9/14/2024</start-date>
+        <end-date>10/4/2024</end-date>
+        <price-per-night>$120</price-per-night>
+    </hotel>
+</hotels>

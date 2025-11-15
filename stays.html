@@ -5,7 +5,24 @@
     <title>Stays</title>
     <link rel="stylesheet" href="mystyle.css" />
     <script src="script.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script defer>
+      var selected = null;
+      var sInput;
+      $(document).ready(function () {
+        $("#hotel-table").on("click", "tr", function (event) {
+          event.preventDefault();
+          if (selected !== null) {
+            selected.css(
+              "background-color",
+              selected.index() % 2 == 0 ? "rgb(240, 240, 240)" : "lightgrey"
+            );
+          }
+          selected = $(this);
+          $(this).css("background-color", "lightskyblue");
+        });
+      });
+
       function validateStays(event) {
         event.preventDefault();
         const city = document.getElementById("city").value.trim();
@@ -44,13 +61,92 @@
         // Infants can stay extra, but other guests ≤ 2 per room
         const nonInfantGuests = adults + children;
         const rooms = Math.ceil(nonInfantGuests / 2);
-
+        sInput = {
+          rooms: rooms,
+          checkIn: checkIn,
+          checkOut: checkOut,
+          adults: adults,
+          children: children,
+          infants: infants,
+        };
+        sr = rooms;
+        sci = checkIn;
+        sco = checkOut;
+        sa = adults;
+        var xml = new XMLHttpRequest();
+        xml.open("GET", "hotels.xml", false);
+        xml.send();
+        var xmlData = xml.responseText;
+        const parser = new DOMParser();
+        let xmlDoc = parser.parseFromString(xmlData, "text/xml");
+        let hotels = xmlDoc.getElementsByTagName("hotel");
+        let table = document.getElementById("hotel-table");
+        $("#hotel-table tr:not(:first-child)").remove();
+        for (let element of hotels) {
+          let attrs = element.children;
+          if (attrs[2].textContent !== city) continue;
+          if (parseInt(attrs[3].textContent) < rooms) continue;
+          if (checkIn < new Date(attrs[4].textContent)) continue;
+          if (checkOut > new Date(attrs[5].textContent)) continue;
+          let row = table.insertRow(-1);
+          for (let i = 0; i < attrs.length; i++) {
+            let cell = row.insertCell(i);
+            cell.innerHTML = attrs[i].textContent;
+          }
+        }
         alert(`Stays search successful:
       City: ${city}
       Check-In: ${checkIn.toDateString()}
       Check-Out: ${checkOut.toDateString()}
       Adults: ${adults}, Children: ${children}, Infants: ${infants}
       Rooms needed: ${rooms}`);
+      }
+
+      function showHotels() {
+        var xml = new XMLHttpRequest();
+        xml.open("GET", "hotels.xml", false);
+        xml.send();
+        var xmlData = xml.responseText;
+        const parser = new DOMParser();
+        let xmlDoc = parser.parseFromString(xmlData, "text/xml");
+        let hotels = xmlDoc.getElementsByTagName("hotel");
+        let table = document.getElementById("hotel-table");
+        $("#hotel-table tr:not(:first-child)").remove();
+        for (let element of hotels) {
+          let attrs = element.children;
+          let row = table.insertRow(-1);
+          for (let i = 0; i < attrs.length; i++) {
+            let cell = row.insertCell(i);
+            cell.innerHTML = attrs[i].textContent;
+          }
+        }
+      }
+
+      function addCart(xmlDoc) {
+        if (selected === null) {
+          alert("Please select a hotel");
+          return;
+        }
+        let attrs = selected.children();
+        let days = Math.floor(
+          Math.abs(sInput.checkIn - sInput.checkOut) / (1000 * 60 * 60 * 24)
+        );
+        let hotel = {
+          id: attrs.eq(0).text(),
+          name: attrs.eq(1).text(),
+          city: attrs.eq(2).text(),
+          adults: sInput.adults,
+          children: sInput.children,
+          infants: sInput.infants,
+          rooms: sInput.rooms,
+          checkIn: sInput.checkIn.toDateString(),
+          checkOut: sInput.checkOut.toDateString(),
+          days: days,
+          ppn: attrs.eq(6).text(),
+          price: parseInt(attrs.eq(6).text().slice(1)) * sInput.rooms * days,
+        };
+        localStorage.setItem("hotel", JSON.stringify(hotel));
+        alert("Hotel has been added to your cart");
       }
     </script>
   </head>
@@ -97,6 +193,21 @@
           ><br />
           <button type="submit">Search</button>
         </form>
+        <button type="button" id="cart-button" onclick="addCart()">
+          Add to Cart
+        </button>
+
+        <table id="hotel-table">
+          <tr>
+            <th>Hotel ID</th>
+            <th>Hotel Name</th>
+            <th>City</th>
+            <th>Number of Available Rooms</th>
+            <th>Available Check In</th>
+            <th>Available Check Out</th>
+            <th>Price Per Night Per Room</th>
+          </tr>
+        </table>
       </div>
     </main>
     <footer>
