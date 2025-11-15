@@ -60,6 +60,79 @@ nav ul li a:hover {
   background: #00b4d8;
 }
 
+#cart-main {
+  flex-direction: column;
+}
+
+#flight-cart {
+  flex-direction: row;
+}
+
+#hotelBody {
+  margin-top: 3em;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+#hotel-cart1 tr,
+#hotel-cart2 tr {
+  text-align: left;
+}
+
+#hotel-cart1 {
+  margin-top: 1em;
+  width: 30%;
+  margin-bottom: 1em;
+}
+
+#hotel-cart2 {
+  width: 80%;
+  margin-bottom: 1em;
+}
+
+#cart-button {
+  display: flex;
+  align-self: flex-end;
+  margin-right: 10%;
+}
+
+#hotel-table {
+  table-layout: fixed;
+  width: 90%;
+  margin: 10px auto;
+  border-collapse: collapse;
+  border-radius: 2px black;
+}
+
+#hotel-table th {
+  background-color: rgb(240, 240, 240);
+}
+
+#hotel-table th,
+#hotel-table td {
+  padding: 0.5em;
+}
+
+#hotel-table tr {
+  text-align: center;
+}
+
+#hotel-table tr:nth-child(odd) {
+  background-color: rgb(240, 240, 240);
+}
+
+#hotel-table tr:nth-child(even) {
+  background-color: lightgrey;
+}
+
+#hotel-table tr:hover {
+  background-color: lightskyblue !important;
+}
+
+#hotel-table tr:first-child {
+  background-color: transparent;
+}
+
 /* FOOTER */
 footer {
   background: #caf0f8;
