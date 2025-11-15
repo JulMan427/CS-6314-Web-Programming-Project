@@ -70,6 +70,7 @@ nav ul li a:hover {
 
 #hotelBody {
   margin-top: 3em;
+  margin-left: 3em;
   flex-wrap: wrap;
   flex-direction: column;
 }
@@ -80,14 +81,21 @@ nav ul li a:hover {
 }
 
 #hotel-cart1 {
+  table-layout: fixed;
   margin-top: 1em;
   width: 30%;
   margin-bottom: 1em;
 }
 
 #hotel-cart2 {
-  width: 80%;
+  table-layout: fixed;
+  width: 90%;
   margin-bottom: 1em;
+}
+
+#hotel-cart1 tr,
+#hotel-cart2 tr {
+  text-align: center;
 }
 
 #cart-button {
