@@ -182,6 +182,7 @@
         if (!hotel) {
           document.getElementById("hotelBody").innerHTML =
             "<p>No booked hotel</p>";
+          document.getElementById("hotelBody").style.marginLeft = "0px";
           return;
         }
         renderHotel();
@@ -436,7 +437,7 @@
         <div id="passengersBox" style="margin-top: 1em"></div>
         <div id="carBookings"></div>
         <div id="hotelBody"></div>
-        <button style="width: 20%" onClick="downloadHotel()">
+        <button style="width: 15%" onClick="downloadHotel()">
           Download Hotel Bookings
         </button>
       </div>

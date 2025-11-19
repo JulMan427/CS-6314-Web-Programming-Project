@@ -12,6 +12,7 @@
       $(document).ready(function () {
         $("#hotel-table").on("click", "tr", function (event) {
           event.preventDefault();
+          if ($(this).index() === 0) return;
           if (selected !== null) {
             selected.css(
               "background-color",
@@ -25,6 +26,7 @@
 
       function validateStays(event) {
         event.preventDefault();
+        selected = null;
         const city = document.getElementById("city").value.trim();
         const checkIn = new Date(document.getElementById("checkIn").value);
         const checkOut = new Date(document.getElementById("checkOut").value);
