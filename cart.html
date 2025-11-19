@@ -393,6 +393,7 @@
         } else {
           book = JSON.parse(obj);
         }
+        res["booking_id"] = bid;
         book.hotels.push(res);
         localStorage.setItem("hotel-book", JSON.stringify(book));
         location.reload();
